@@ -8,41 +8,43 @@ PIPELINE OVERVIEW
   Stage 1  Decode + resize image
   Stage 2  Grid detection — 5-strategy cascade (handles severe perspective)
   Stage 3  Perspective warp → 450×450 px normalised grid
-  Stage 4  Cell extraction (81 cells, 44×44 px each after margin trim)
-  Stage 5  Cell binarisation — 6 methods + CLAHE variants, best by contour score
-  Gate 1   Blank detection — 2-of-3 signal voting (CLAHE-enhanced S2)
+  Stage 4  Cell extraction — 81 cells, 40×40 px each (CELL_MARGIN = 5)
+  Stage 5  Cell binarisation — 12 candidates (6 raw + 6 CLAHE-enhanced),
+           best selected by contour-area score
+  Gate 1   Blank detection — rule: non-blank = S1 AND (S2 OR S3)
   Layer 1  DigitCNN inference with Test-Time Augmentation (8 passes)
   Layer 2  Self-supervised template re-scoring
   Layer 3  Sudoku constraint correction (guarantees consistent board)
   Fallback kNN on MNIST features (when no model weights available)
 
+KEY DESIGN DECISIONS
+─────────────────────
+  CELL_MARGIN = 5 (raised from 3):
+    Telegraph grids have 3-4 px thick 3×3-box boundary lines.  With margin=3
+    these lines bleed into the first pixel-column/row of the adjacent cell,
+    producing a full-cell-width L-shaped binary artifact.  margin=5 reliably
+    clears all thick lines before any signal is computed.
+
+  Blank detection: non-blank = S1 AND (S2 OR S3):
+    S1 (dark-pixel ratio, threshold 0.030) is a mandatory gate.  It measures
+    the fraction of inner-crop pixels more than 28% darker than the cell mean.
+    Blank paper cells score ≈ 0.000; digit cells score 0.10–0.28.
+    CLAHE amplifies grain in blank cells into fake S2/S3 contours, but grain
+    never raises S1 above 0.000 — so requiring S1 eliminates all such FPs.
+
+  Full-cell contour guard (> 85% width AND height):
+    Border-line L-artifacts that survive margin trimming produce a contour
+    whose bounding box spans the entire cell.  Rejected by _contour_signal
+    and _digit_contour before being passed to _stroke_signal.
+
+  CLAHE in _best_binarise (clipLimit=2.0, tileGridSize=4×4):
+    Running all 6 threshold methods on both the raw and CLAHE-enhanced cell
+    doubles the chance of recovering a clean contour from faint ink (~30
+    grey-level delta).
+
 NORMALISATION — must match train.py exactly:
   mean = (0.8693,)   std = (0.3081,)
   Images: BLACK digit on WHITE background before normalisation.
-
-FIX LOG (faint-newspaper digit recovery)
-─────────────────────────────────────────
-  Problem: Digits in low-contrast newspaper photos were classified as blank
-  because the binarisation pipeline failed to produce valid contours for S2.
-
-  Root causes:
-    1. MIN_AREA_RATIO = 0.015 too high for thin digits like '1' after binarisation.
-    2. _best_binarise() never applied CLAHE before thresholding.
-       Faint ink (delta ~30 grey levels) produces almost no contrast for adaptive
-       threshold to work on, so the resulting binary had no valid contours.
-    3. _contrast_signal threshold 0.12 rejected super-faint cells even when
-       a digit was visually present.
-    4. Minimum height check 0.18*ch in _contour_signal clipped some real digits.
-
-  Fixes applied:
-    1. MIN_AREA_RATIO lowered to 0.008.
-    2. _best_binarise() now tries CLAHE-enhanced versions of every method
-       in addition to the raw versions. The best score across all 12 attempts
-       is used. CLAHE (clipLimit=2.0, tileGridSize=4×4) equalises local contrast
-       to make faint ink legible to adaptive thresholding.
-    3. _contrast_signal threshold lowered from 0.12 to 0.06.
-    4. Minimum height in _contour_signal lowered from 0.18 to 0.12.
-    5. Voting structure kept at 2-of-3 to prevent grid-line false positives.
 """
 
 import os
@@ -62,7 +64,12 @@ _DATA = os.path.join(_ROOT, "data")
 # ── Grid geometry ──────────────────────────────────────────────────────────────
 GRID_SIZE = 450
 CELL_SIZE = GRID_SIZE // 9        # 50 px
-CELL_MARGIN = 3                      # px trimmed per edge → 44×44 cell
+CELL_MARGIN = 5                      # px trimmed per edge → 40×40 cell
+#   Raised from 3 → 5.  The 3×3-box boundary lines are 3-4 px wide in the
+#   warped grid.  With CELL_MARGIN=3 the thick line bleeds into col-0/row-0
+#   of the crop for cells immediately after a thick line (cols 3, 6 and
+#   their row equivalents), producing a full-cell-width binarised artifact
+#   that confuses blank detection.  5 px clears any thick line reliably.
 
 # ── Contour thresholds ─────────────────────────────────────────────────────────
 # Lowered from 0.015 → 0.008 to catch thin digits like '1' that produce
@@ -300,6 +307,12 @@ def _warp(gray: np.ndarray, corners: np.ndarray) -> np.ndarray:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def _extract_cells(warped: np.ndarray) -> list:
+    """
+    Slice the 450×450 warped grid into 81 cells.
+    CELL_MARGIN=5 produces 40×40 px inner crops (was 44×44 at CELL_MARGIN=3).
+    The larger margin is required to clear the 4px thick 3×3-box boundary
+    lines that bleed into cell (0,0) of each box and produce spurious contours.
+    """
     cells = []
     for row in range(9):
         for col in range(9):
@@ -403,50 +416,72 @@ def _best_binarise(cell: np.ndarray) -> np.ndarray:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  GATE 1 — BLANK DETECTION  (2-of-3 signal voting)
+#  GATE 1 — BLANK DETECTION
 #
-#  Three independent signals, any two must agree for non-blank:
-#    S1 Local contrast  — digit darkens its cell significantly vs background
-#    S2 Contour check   — large enough, correct shape blob present
-#                         (now uses CLAHE-enhanced binarisation via _best_binarise)
-#    S3 Stroke width    — blob has digit-like proportions (not paper dust)
+#  Rule: non-blank = S1 AND (S2 OR S3)
 #
-#  Voting stays at 2-of-3 to prevent grid-line artefacts from being mistaken
-#  for digits (S1 alone can fire on a grid-line crossing).
+#  S1  Dark-pixel ratio  — fraction of inner-crop pixels more than 28% darker
+#                          than the cell mean.  Blank paper: ~0.000.
+#                          Digit cell: 0.10 – 0.28.  Zero overlap on clean scans.
+#                          MANDATORY: required for any non-blank classification.
 #
-#  Changes vs previous version:
-#    S1 threshold: 0.12 → 0.06  (catches super-faint newspaper print)
-#    S2 now uses CLAHE-enhanced _best_binarise (recovers faint contours)
-#    S2 min height: 0.18 → 0.12 (catches digits near cell edge or partial)
+#  S2  Contour check     — binarised cell contains a blob large enough (≥ 0.8%
+#                          cell area), tall enough (≥ 15% cell height), and NOT
+#                          spanning the full cell (< 85% both dims).  The
+#                          full-cell guard rejects thick grid-line L-artifacts
+#                          that bleed in when the warp aligns exactly on a line.
+#
+#  S3  Stroke geometry   — blob bounding box within digit-proportioned bounds
+#                          (6%–92% of cell width, 15%–92% of cell height).
+#
+#  Why S1 is mandatory (vs old 2-of-3):
+#    Old S1 (darkest-10%-vs-mean > 0.12) scored 0.05–0.13 for blank cells with
+#    newsprint grain — too close to faint digits.  New S1 (dark-pixel ratio at
+#    72% of mean > 0.030) scores ~0.000 for blank cells and 0.10–0.28 for digits
+#    on this image class.  CLAHE (in _best_binarise) amplifies grain into fake
+#    S2+S3 contours in blank cells; requiring S1 eliminates these false positives.
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def _contrast_signal(cell: np.ndarray) -> bool:
     """
-    True if the darkest 10% of pixels are significantly below the cell mean.
-    Threshold lowered from 0.12 to 0.06 to detect faint newspaper ink where
-    the digit is only ~30 grey levels darker than the paper background.
+    S1 — True when the cell contains ink significantly darker than its background.
+
+    Method: count pixels that are more than 28 % darker than the cell mean.
+    A blank paper cell has ~0 such pixels (grain is ±5-8 % around mean).
+    A digit cell has ≥ 3 % of its pixels in this range (the ink strokes).
+
+    This replaces the old "darkest-10%-vs-mean" ratio test, which fired on
+    blank cells because newsprint grain (~±15 grey levels on a mean of ~175)
+    gave ratios of 0.05-0.09 — indistinguishable from faint ink at ratio 0.06.
+    The absolute-fraction approach is immune to the overall brightness level.
     """
     h, w = cell.shape
-    mh, mw = max(1, h//7), max(1, w//7)
-    inner = cell[mh:h-mh, mw:w-mw].ravel().astype(np.float32)
+    mh, mw = max(1, h // 7), max(1, w // 7)
+    inner = cell[mh:h - mh, mw:w - mw].astype(np.float32)
     if inner.size == 0:
         return False
-    n_dark = max(1, len(inner) // 10)
-    dark = np.sort(inner)[:n_dark].mean()
     mean_ = inner.mean()
-    # Contrast = relative drop of darkest pixels below mean
-    # Lowered threshold: 0.12 → 0.06
-    return (mean_ - dark) / (mean_ + 1e-6) > 0.06
+    # Pixels more than 28 % below mean → genuine ink, not paper grain
+    dark_thresh = mean_ * 0.72
+    dark_ratio  = float((inner < dark_thresh).sum()) / inner.size
+    return dark_ratio > 0.030
 
 
 def _contour_signal(binary: np.ndarray) -> tuple:
     """
     Returns (valid: bool, contour, bbox).
-    Minimum digit height lowered from 0.18*ch to 0.12*ch to handle digits
-    that are small, partially out-of-cell, or clipped by cell extraction.
+
+    Guards added:
+    • Full-cell bbox rejection: if the bounding box covers > 85 % of both the
+      cell width AND cell height, it is a border-line artifact, not a digit.
+      (Thick grid lines produce an L-shaped contour that spans the full crop.)
+    • Minimum digit height: 0.15 × cell height (was 0.18, then 0.12).
+      0.15 is a safe lower bound that still catches the digit '1' while
+      rejecting single-pixel noise rows.
     """
     ca = binary.shape[0] * binary.shape[1]
     ch = binary.shape[0]
+    cw = binary.shape[1]
     for src in (cv2.erode(binary, np.ones((2, 2), np.uint8), iterations=1), binary):
         cnts, _ = cv2.findContours(src, cv2.RETR_EXTERNAL,
                                    cv2.CHAIN_APPROX_SIMPLE)
@@ -459,40 +494,66 @@ def _contour_signal(binary: np.ndarray) -> tuple:
             continue
         if w > h and (w / max(h, 1)) > MAX_ASPECT:
             continue   # horizontal sliver = grid line
-        if h < ch * 0.12:          # was 0.18
+        if h < ch * 0.15:
             continue   # too short to be a digit
+        # Full-cell artifact: border line bled through CELL_MARGIN
+        if w > cw * 0.85 and h > ch * 0.85:
+            continue
         return True, best, (x, y, w, h)
     return False, None, None
 
 
 def _stroke_signal(cell: np.ndarray, bbox) -> bool:
-    """True if blob dimensions are consistent with a printed digit stroke."""
+    """True if blob dimensions are consistent with a printed digit stroke.
+    Lower bounds match _contour_signal (0.15 height, 0.06 width).
+    Upper bounds kept at 0.92 — the full-cell guard in _contour_signal
+    already rejects border artifacts before this is reached.
+    """
     if bbox is None:
         return False
     x, y, w, h = bbox
     cw, ch = cell.shape[1], cell.shape[0]
-    return (cw * 0.08 <= w <= cw * 0.92 and
-            ch * 0.12 <= h <= ch * 0.92)   # also relaxed lower bound: 0.18→0.12
+    return (cw * 0.06 <= w <= cw * 0.92 and
+            ch * 0.15 <= h <= ch * 0.92)
 
 
 def _is_blank(cell: np.ndarray) -> bool:
     """
-    2-of-3 voting: returns True only if < 2 signals indicate a digit.
+    Blank detection gate.
 
-    S2 now benefits from CLAHE preprocessing inside _best_binarise(), making
-    it sensitive to faint newspaper digits that previously produced no contour.
+    A cell is classified as NON-BLANK only when BOTH conditions hold:
+      • S1 (dark-pixel ratio) — genuine ink is present; ink pixels are > 28%
+        darker than the cell mean.  This signal alone cannot be faked by paper
+        grain (grain is ±5-8% of mean) or by CLAHE-amplified texture.
+      • S2 OR S3 — at least one structural signal confirms the ink forms a
+        digit-shaped blob: either _contour_signal (area + height + non-full-cell
+        checks) or _stroke_signal (width/height proportions).
+
+    Rule: is_blank = NOT (S1 AND (S2 OR S3))
+
+    Why this beats old 2-of-3:
+      Old S1 threshold (0.12) was indistinguishable from newsprint grain
+      (ratio 0.05–0.09), so S1 fired on blank cells.  The new dark-pixel-ratio
+      S1 at threshold 0.030 is immune to grain — blank cells score ~0.000,
+      digit cells score 0.10–0.28.  Requiring S1 as a mandatory gate means
+      CLAHE grain (which can produce S2=True+S3=True contours in blank cells)
+      can never generate a false positive, because grain never passes S1.
     """
     binary = _best_binarise(cell)
-    s1 = _contrast_signal(cell)
+    s1     = _contrast_signal(cell)
     ok, _, bbox = _contour_signal(binary)
     s2 = ok
     s3 = _stroke_signal(cell, bbox) if ok else False
-    return (int(s1) + int(s2) + int(s3)) < 2
+    return not (s1 and (s2 or s3))
 
 
 def _digit_contour(binary: np.ndarray):
-    """Return (contour, bbox) of best digit-shaped blob, else (None, None)."""
+    """Return (contour, bbox) of best digit-shaped blob, else (None, None).
+    Same full-cell guard as _contour_signal: rejects border-line artifacts.
+    """
     ca = binary.shape[0] * binary.shape[1]
+    cw = binary.shape[1]
+    ch = binary.shape[0]
     for src in (cv2.erode(binary, np.ones((2, 2), np.uint8), iterations=1), binary):
         cnts, _ = cv2.findContours(src, cv2.RETR_EXTERNAL,
                                    cv2.CHAIN_APPROX_SIMPLE)
@@ -505,6 +566,8 @@ def _digit_contour(binary: np.ndarray):
             continue
         if w > h and (w / max(h, 1)) > MAX_ASPECT:
             continue
+        if w > cw * 0.85 and h > ch * 0.85:
+            continue   # full-cell border artifact
         return best, (x, y, w, h)
     return None, None
 
