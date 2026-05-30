@@ -15,7 +15,7 @@ ENDPOINTS
   GET  /api/health   → model + server status
 """
 
-from backend.solver import validate_board
+from backend.solver import solve_sudoku, validate_board
 from backend.ocr import extract_sudoku_full, extract_sudoku_from_image, load_model
 from flask_cors import CORS
 from flask import Flask, request, jsonify, send_from_directory
@@ -213,12 +213,9 @@ def ocr_endpoint():
             500)
 
 
-'''
-NOT REQUIRED
-
 @app.route("/api/solve", methods=["POST"])
 def solve_endpoint():
-    """Solve a sudoku board."""
+    """Solve a sudoku board — used internally to compute the reference solution."""
     board, err = _validate_board_input(request.get_json(silent=True))
     if err:
         return err
@@ -229,7 +226,6 @@ def solve_endpoint():
     except Exception:
         log.error("Solve error:\n" + traceback.format_exc())
         return _error("Solver encountered an unexpected error.", 500)
-'''
 
 
 @app.route("/api/validate", methods=["POST"])
@@ -260,7 +256,16 @@ def health():
 #  ENTRY POINT
 # ═══════════════════════════════════════════════════════════════════════════════
 
+# if __name__ == "__main__":
+#     port = int(os.environ.get("PORT", 5000))
+#     print(f"  Open: http://127.0.0.1:{port}\n")
+#     app.run(debug=True, host="0.0.0.0", port=port)
+
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    print(f"  Open: http://127.0.0.1:{port}\n")
-    app.run(debug=True, host="0.0.0.0", port=port)
+    port = int(os.environ.get("PORT", 7860))
+
+    app.run(
+        host="0.0.0.0",
+        port=port
+    )
