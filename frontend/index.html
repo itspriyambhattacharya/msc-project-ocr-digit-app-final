@@ -1125,6 +1125,48 @@
           display: none;
         }
       }
+
+      .project-team {
+        background: var(--bg-card);
+        border: 1px solid var(--border-mid);
+        border-radius: var(--r-lg);
+        padding: 1.2rem 1.5rem;
+        box-shadow: var(--sh-md);
+      }
+
+      .team-title {
+        font-family: var(--display);
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--green);
+        margin-bottom: 0.8rem;
+        letter-spacing: 0.03em;
+      }
+
+      .team-list {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 0;
+      }
+
+      .team-list li {
+        background: var(--bg-raised);
+        border: 1px solid var(--border-mid);
+        color: var(--text);
+        padding: 8px 14px;
+        border-radius: var(--r-md);
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+
+      .team-list li:hover {
+        color: var(--green);
+        border-color: var(--green);
+        box-shadow: 0 0 12px var(--green-dim);
+        transform: translateY(-2px);
+      }
     </style>
   </head>
   <body>
@@ -1152,11 +1194,20 @@
      MAIN
 ═══════════════════════════════════════════════════════ -->
     <main>
+      <section class="project-team">
+        <p class="team-title">Project By</p>
+        <ul class="team-list">
+          <li>Priyam Bhattacharya</li>
+          <li>Pritam Mondal</li>
+          <li>Sreena Mondal</li>
+          <li>Dr. Rajib Das</li>
+        </ul>
+      </section>
       <!-- ── 1. UPLOAD ──────────────────────────────────────────── -->
       <section id="panel-upload">
         <div class="sec-head">
           <div class="sec-num">1</div>
-          <div class="sec-label">Upload a Telegraph sudoku image</div>
+          <div class="sec-label">Upload a Sudoku image</div>
         </div>
 
         <div class="drop-zone" id="drop-zone">
@@ -1229,6 +1280,45 @@
                 <line x1="12" y1="17" x2="12.01" y2="17" />
               </svg>
               <span id="chip-txt">0 conflicts</span>
+            </div>
+            <!-- colour legend -->
+            <div
+              id="colour-legend"
+              style="
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                font-size: 0.67rem;
+                color: var(--text-3);
+                padding: 2px 0;
+              "
+            >
+              <span style="display: flex; align-items: center; gap: 5px">
+                <span
+                  style="
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 2px;
+                    background: var(--red-dim);
+                    border: 1px solid var(--red);
+                    flex-shrink: 0;
+                  "
+                ></span>
+                Rule conflict (same digit in row/col/box)
+              </span>
+              <span style="display: flex; align-items: center; gap: 5px">
+                <span
+                  style="
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 2px;
+                    background: rgba(210, 153, 34, 0.16);
+                    border: 1px solid var(--amber);
+                    flex-shrink: 0;
+                  "
+                ></span>
+                Wrong placement (incorrect for this puzzle)
+              </span>
             </div>
 
             <!-- Input mode toggle -->
@@ -1368,6 +1458,8 @@
         let ocrSnap = Array(81).fill(0);
         let selected = -1;
         let conflicts = [];
+        let solution = Array(81).fill(0); // correct solution, loaded after OCR
+        let solutionReady = false;
         let valTimer = null;
         let hintOpen = false;
         let inputMode = "pen"; // 'pen' | 'pencil'
@@ -1531,6 +1623,14 @@
             if (given[i]) el.classList.add("given");
             if (board[i] !== 0) el.classList.add("has-digit");
             if (cSet.has(i)) el.classList.add("conflict");
+            else if (
+              solutionReady &&
+              !given[i] &&
+              board[i] !== 0 &&
+              board[i] !== solution[i]
+            ) {
+              el.classList.add("warn"); // wrong position — doesn't match solution
+            }
             if (i === selected) el.classList.add("selected");
             else if (sr >= 0) {
               const sameBox =
@@ -1786,6 +1886,7 @@
           }
 
           render();
+          updateChip();
           const el = document.getElementById("c" + selected);
           if (el && !given[selected] && board[selected] !== 0)
             el.classList.add("user");
@@ -1893,9 +1994,23 @@
         }
 
         function updateChip() {
-          const n = conflicts.length;
-          if (n > 0) {
-            $chipTxt.textContent = `${n} conflict${n > 1 ? "s" : ""} — check red cells`;
+          const nConflict = conflicts.length;
+          // Count user-entered cells that don't match the solution
+          const nWrong = solutionReady
+            ? board.filter((v, i) => !given[i] && v !== 0 && v !== solution[i])
+                .length
+            : 0;
+
+          if (nConflict > 0 || nWrong > 0) {
+            const parts = [];
+            if (nConflict > 0)
+              parts.push(
+                `${nConflict} rule conflict${nConflict > 1 ? "s" : ""}`,
+              );
+            if (nWrong > 0)
+              parts.push(`${nWrong} wrong placement${nWrong > 1 ? "s" : ""}`);
+            $chipTxt.textContent =
+              parts.join(" · ") + " — check highlighted cells";
             $chip.classList.add("on");
           } else {
             $chip.classList.remove("on");
@@ -1943,6 +2058,8 @@
           pencilMarks = Array.from({ length: 81 }, () => new Set());
           selected = -1;
           conflicts = [];
+          solution = Array(81).fill(0);
+          solutionReady = false;
           closeHint();
           $chip.classList.remove("on");
           $dcount.textContent = digits.filter(Boolean).length;
@@ -1950,6 +2067,26 @@
           setOcrBadge(mode === "cnn" ? "cnn" : "knn");
           render();
           runValidate();
+          fetchSolution(digits); // silently pre-compute the correct solution
+        }
+
+        /* ── fetch solution (silent — used only for wrong-placement check) ── */
+        async function fetchSolution(digits) {
+          try {
+            const res = await fetch(`${API}/api/solve`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ board: digits }),
+            });
+            const data = await res.json();
+            if (data.solved && data.board) {
+              solution = data.board;
+              solutionReady = true;
+              render(); // re-render with solution context
+            }
+          } catch {
+            // Backend offline — solution check unavailable; no visual change
+          }
         }
 
         /* ── OCR ─────────────────────────────────────────────────────── */
@@ -1997,7 +2134,18 @@
               1, 7, 0, 0, 0, 2, 0, 0, 0, 6, 0, 6, 0, 0, 0, 0, 2, 8, 0, 0, 0, 0,
               4, 1, 9, 0, 0, 5, 0, 0, 0, 0, 8, 0, 0, 7, 9,
             ];
+            // Known correct solution for the demo puzzle (used offline)
+            const demoSolution = [
+              5, 3, 4, 6, 7, 8, 9, 1, 2, 6, 7, 2, 1, 9, 5, 3, 4, 8, 1, 9, 8, 3,
+              4, 2, 5, 6, 7, 8, 5, 9, 7, 6, 1, 4, 2, 3, 4, 2, 6, 8, 5, 3, 7, 9,
+              1, 7, 1, 3, 9, 2, 4, 8, 5, 6, 9, 6, 1, 5, 3, 7, 2, 8, 4, 2, 8, 7,
+              4, 1, 9, 6, 3, 5, 3, 4, 5, 2, 8, 6, 1, 7, 9,
+            ];
             loadBoard(demo, "knn");
+            // Provide the offline solution directly (skip the fetch attempt)
+            solution = demoSolution;
+            solutionReady = true;
+            render();
             setPills(3);
             $upload.style.display = "none";
             $board.classList.add("on");
@@ -2016,9 +2164,10 @@
           closeHint();
           document
             .querySelectorAll(".cell")
-            .forEach((c) => c.classList.remove("conflict", "user"));
+            .forEach((c) => c.classList.remove("conflict", "user", "warn"));
           $tip.classList.add("on");
           runValidate();
+          updateChip();
           setStatus("success", "Board reset to OCR result.", true);
           render();
         }
@@ -2027,6 +2176,8 @@
           board = Array(81).fill(0);
           given = Array(81).fill(false);
           ocrSnap = Array(81).fill(0);
+          solution = Array(81).fill(0);
+          solutionReady = false;
           pencilMarks = Array.from({ length: 81 }, () => new Set());
           selected = -1;
           conflicts = [];
@@ -2034,7 +2185,9 @@
           $chip.classList.remove("on");
           document
             .querySelectorAll(".cell")
-            .forEach((c) => c.classList.remove("conflict", "user", "given"));
+            .forEach((c) =>
+              c.classList.remove("conflict", "user", "given", "warn"),
+            );
           setStatus("", "", true);
           render();
         }
