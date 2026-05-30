@@ -60,7 +60,7 @@ def _find_conflicts(board):
         if not v:
             continue
         row, col = divmod(i, 9)
-        br, bc   = (row // 3) * 3, (col // 3) * 3
+        br, bc = (row // 3) * 3, (col // 3) * 3
         peers = (
             [row * 9 + c for c in range(9) if c != col] +
             [r * 9 + col for r in range(9) if r != row] +
@@ -76,6 +76,9 @@ def _find_conflicts(board):
                     conflicts.append(list(key))
     return conflicts
 
+
+'''
+NOT REQUIRED
 
 def solve_sudoku(flat_board: list) -> dict:
     """
@@ -99,6 +102,7 @@ def solve_sudoku(flat_board: list) -> dict:
         "error":     None if solved else
                      "No valid solution exists. Check for incorrect given digits.",
     }
+'''
 
 
 def validate_board(flat_board: list) -> dict:

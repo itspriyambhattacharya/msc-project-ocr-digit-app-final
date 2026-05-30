@@ -15,16 +15,20 @@ ENDPOINTS
   GET  /api/health   → model + server status
 """
 
+from backend.solver import validate_board
+from backend.ocr import extract_sudoku_full, extract_sudoku_from_image, load_model
+from flask_cors import CORS
+from flask import Flask, request, jsonify, send_from_directory
 import os
 import sys
 import logging
 import traceback
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
-ROOT_DIR     = os.path.dirname(os.path.abspath(__file__))
-BACKEND_DIR  = os.path.join(ROOT_DIR, "backend")
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+BACKEND_DIR = os.path.join(ROOT_DIR, "backend")
 FRONTEND_DIR = os.path.join(ROOT_DIR, "frontend")
-MODEL_PATH   = os.path.join(BACKEND_DIR, "model_weights", "digit_cnn.pth")
+MODEL_PATH = os.path.join(BACKEND_DIR, "model_weights", "digit_cnn.pth")
 
 for p in (ROOT_DIR, BACKEND_DIR):
     if p not in sys.path:
@@ -32,19 +36,16 @@ for p in (ROOT_DIR, BACKEND_DIR):
 
 # ── Logging ────────────────────────────────────────────────────────────────────
 logging.basicConfig(
-    level   = logging.INFO,
-    format  = "%(asctime)s  %(levelname)-8s  %(message)s",
-    datefmt = "%H:%M:%S",
+    level=logging.INFO,
+    format="%(asctime)s  %(levelname)-8s  %(message)s",
+    datefmt="%H:%M:%S",
 )
 log = logging.getLogger("sudoku_ocr")
 
 # ── Flask ──────────────────────────────────────────────────────────────────────
-from flask      import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
 
 # ── Project imports ────────────────────────────────────────────────────────────
-from backend.ocr    import extract_sudoku_full, extract_sudoku_from_image, load_model
-from backend.solver import solve_sudoku, validate_board
+# from backend.solver import solve_sudoku, validate_board
 
 app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
 CORS(app)
@@ -58,7 +59,8 @@ ALLOWED_TYPES = {
     "image/png",  "image/x-png",                 # PNG
     "image/webp",                                 # WEBP
     "image/bmp",  "image/x-bmp",                 # BMP
-    "application/octet-stream",                   # Some browsers send this for any file
+    # Some browsers send this for any file
+    "application/octet-stream",
     "",                                           # No content-type header at all
 }
 
@@ -71,21 +73,22 @@ ALLOWED_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
 # ═══════════════════════════════════════════════════════════════════════════════
 
 print("\n" + "=" * 60)
-print("  OCR Sudoku Solver — Telegraph Edition")
+print("  OCR Sudoku Solver")
 print("=" * 60)
 print(f"  Root     : {ROOT_DIR}")
 print(f"  Frontend : {FRONTEND_DIR}")
 print(f"  Model    : {MODEL_PATH}")
 idx_ok = os.path.isfile(os.path.join(FRONTEND_DIR, "index.html"))
-print(f"  index.html: {'FOUND ✓' if idx_ok else 'MISSING ✗ — check frontend/'}")
+print(
+    f"  index.html: {'FOUND ✓' if idx_ok else 'MISSING ✗ — check frontend/'}")
 print("=" * 60 + "\n")
 
-model       = None
+model = None
 MODEL_READY = False
 
 if os.path.isfile(MODEL_PATH):
     try:
-        model       = load_model(MODEL_PATH)
+        model = load_model(MODEL_PATH)
         MODEL_READY = True
         print("  OCR mode : DigitCNN (PyTorch)  ✓\n")
     except RuntimeError as e:
@@ -133,9 +136,11 @@ def _validate_board_input(data) -> tuple:
 def too_large(e):
     return _error("Image too large. Maximum allowed size is 10 MB.", 413)
 
+
 @app.errorhandler(404)
 def not_found(e):
     return _error("Endpoint not found.", 404)
+
 
 @app.errorhandler(405)
 def method_not_allowed(e):
@@ -171,7 +176,7 @@ def ocr_endpoint():
     filename_ext = os.path.splitext(file.filename or "")[1].lower()
 
     type_ok = content_type in ALLOWED_TYPES
-    ext_ok  = filename_ext in ALLOWED_EXTS
+    ext_ok = filename_ext in ALLOWED_EXTS
 
     if not type_ok and not ext_ok:
         return _error(
@@ -208,6 +213,9 @@ def ocr_endpoint():
             500)
 
 
+'''
+NOT REQUIRED
+
 @app.route("/api/solve", methods=["POST"])
 def solve_endpoint():
     """Solve a sudoku board."""
@@ -221,6 +229,7 @@ def solve_endpoint():
     except Exception:
         log.error("Solve error:\n" + traceback.format_exc())
         return _error("Solver encountered an unexpected error.", 500)
+'''
 
 
 @app.route("/api/validate", methods=["POST"])

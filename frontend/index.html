@@ -923,6 +923,97 @@
         font-family: var(--mono);
       }
 
+      /* ── input mode toggle ──────────────────────────────────── */
+      .mode-toggle {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 0.1rem;
+      }
+      .mode-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 7px 10px;
+        border-radius: var(--r-md);
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        transition: all 0.15s;
+        border: 1px solid var(--border-mid);
+        background: var(--bg-card);
+        color: var(--text-2);
+      }
+      .mode-btn svg {
+        width: 12px;
+        height: 12px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2.2;
+        flex-shrink: 0;
+      }
+      .mode-btn:hover {
+        background: var(--bg-hover);
+        color: var(--text);
+      }
+      .mode-btn.active-pen {
+        background: rgba(56, 139, 253, 0.16);
+        border-color: var(--blue);
+        color: var(--blue);
+        box-shadow: 0 0 10px var(--blue-dim);
+      }
+      .mode-btn.active-pencil {
+        background: rgba(163, 113, 247, 0.16);
+        border-color: var(--purple);
+        color: var(--purple);
+        box-shadow: 0 0 10px var(--purple-dim);
+      }
+
+      /* ── digit-val span (main confirmed digit inside cell) ───── */
+      .digit-val {
+        position: relative;
+        z-index: 1;
+        font-family: var(--mono);
+        font-size: 1.22rem;
+        font-weight: 600;
+        line-height: 1;
+      }
+
+      /* ── pencil marks in cells ──────────────────────────────── */
+      .pencil-marks {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        pointer-events: none;
+        padding: 2px;
+      }
+      .pencil-marks span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--mono);
+        font-size: 0.5rem;
+        font-weight: 700;
+        color: var(--purple);
+        opacity: 0;
+        line-height: 1;
+      }
+      .pencil-marks span.on {
+        opacity: 0.9;
+      }
+      /* hide overlay when cell has a confirmed digit */
+      .cell.has-digit .pencil-marks {
+        visibility: hidden;
+      }
+      .cell.given .pencil-marks,
+      .cell.solved .pencil-marks {
+        display: none;
+      }
+
       /* ── tip box ────────────────────────────────────────────── */
       #tip {
         display: none;
@@ -1140,6 +1231,31 @@
               <span id="chip-txt">0 conflicts</span>
             </div>
 
+            <!-- Input mode toggle -->
+            <div>
+              <div class="ctrl-label">Input Mode</div>
+              <div class="mode-toggle">
+                <button class="mode-btn active-pen" id="mode-pen">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 20h9" />
+                    <path
+                      d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+                    />
+                  </svg>
+                  Pen
+                </button>
+                <button class="mode-btn" id="mode-pencil">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+                    />
+                    <line x1="15" y1="5" x2="19" y2="9" />
+                  </svg>
+                  Pencil
+                </button>
+              </div>
+            </div>
+
             <!-- Numpad -->
             <div>
               <div class="ctrl-label">Number Pad</div>
@@ -1210,9 +1326,12 @@
 
             <!-- Tip -->
             <div id="tip" class="on">
-              <strong>Tip:</strong> Click any empty cell, then press
-              <strong>Show hint</strong> to see which digits are valid and why.
-              Blue = OCR-detected. Arrow keys navigate cells.
+              <strong>Tip:</strong> <strong>Pen</strong> = confirm a digit
+              (clears peers' pencil marks). <strong>Pencil</strong> = toggle
+              candidate notes in a 3×3 mini-grid. Press <strong>P</strong> /
+              <strong>C</strong> to switch modes. Click an empty cell then
+              <strong>Show hint</strong> for constraint reasoning. Arrow keys
+              navigate.
             </div>
           </div>
           <!-- /ctrl-panel -->
@@ -1251,6 +1370,8 @@
         let conflicts = [];
         let valTimer = null;
         let hintOpen = false;
+        let inputMode = "pen"; // 'pen' | 'pencil'
+        let pencilMarks = Array.from({ length: 81 }, () => new Set()); // per-cell candidate sets
 
         /* ── element refs ────────────────────────────────────────────── */
         const $upload = document.getElementById("panel-upload");
@@ -1333,6 +1454,24 @@
             d.dataset.r = r;
             d.dataset.c = c;
             d.addEventListener("click", () => selectCell(i));
+
+            // Main digit span — updated by render(), never wiped
+            const dv = document.createElement("span");
+            dv.className = "digit-val";
+            dv.id = "dv" + i;
+            d.appendChild(dv);
+
+            // Pencil marks overlay — 9 tiny spans (digits 1-9)
+            const pm = document.createElement("div");
+            pm.className = "pencil-marks";
+            pm.id = "pm" + i;
+            for (let k = 1; k <= 9; k++) {
+              const s = document.createElement("span");
+              s.id = "pm" + i + "_" + k;
+              s.textContent = k;
+              pm.appendChild(s);
+            }
+            d.appendChild(pm);
             el.appendChild(d);
           }
         }
@@ -1354,6 +1493,15 @@
           el.appendChild(del);
         }
 
+        /* ── input mode ──────────────────────────────────────────────── */
+        function setMode(mode) {
+          inputMode = mode;
+          document.getElementById("mode-pen").className =
+            "mode-btn" + (mode === "pen" ? " active-pen" : "");
+          document.getElementById("mode-pencil").className =
+            "mode-btn" + (mode === "pencil" ? " active-pencil" : "");
+        }
+
         /* ── render ──────────────────────────────────────────────────── */
         function render() {
           const sr = selected >= 0 ? Math.floor(selected / 9) : -1;
@@ -1369,9 +1517,19 @@
             el.className = "cell";
             el.dataset.r = r;
             el.dataset.c = c;
-            el.textContent = board[i] || "";
+
+            // Update main digit (via dedicated span — never wipes overlay)
+            const dvEl = document.getElementById("dv" + i);
+            if (dvEl) dvEl.textContent = board[i] || "";
+
+            // Update pencil mark spans
+            for (let k = 1; k <= 9; k++) {
+              const s = document.getElementById("pm" + i + "_" + k);
+              if (s) s.className = pencilMarks[i].has(k) ? "on" : "";
+            }
 
             if (given[i]) el.classList.add("given");
+            if (board[i] !== 0) el.classList.add("has-digit");
             if (cSet.has(i)) el.classList.add("conflict");
             if (i === selected) el.classList.add("selected");
             else if (sr >= 0) {
@@ -1593,11 +1751,44 @@
 
         function enterDigit(n) {
           if (selected < 0) return;
-          if (given[selected] && n !== 0) return;
-          board[selected] = n;
+          if (given[selected]) return; // never modify OCR-given cells
+
+          if (n === 0) {
+            // DEL — clears both pen digit and all pencil marks
+            board[selected] = 0;
+            pencilMarks[selected].clear();
+          } else if (inputMode === "pencil") {
+            // Pencil mode: toggle candidate mark; clear pen digit first
+            if (board[selected] !== 0) {
+              board[selected] = 0; // writing pencil marks removes pen digit
+            }
+            if (pencilMarks[selected].has(n)) {
+              pencilMarks[selected].delete(n);
+            } else {
+              pencilMarks[selected].add(n);
+            }
+          } else {
+            // Pen mode: confirm digit; clear pencil marks on this cell
+            board[selected] = n;
+            pencilMarks[selected].clear();
+            // Also remove this digit from pencil marks of all peers
+            const r = Math.floor(selected / 9),
+              c = selected % 9;
+            const br = Math.floor(r / 3) * 3,
+              bc = Math.floor(c / 3) * 3;
+            for (let j = 0; j < 9; j++) {
+              pencilMarks[r * 9 + j].delete(n); // same row
+              pencilMarks[j * 9 + c].delete(n); // same col
+            }
+            for (let dr = 0; dr < 3; dr++)
+              for (let dc = 0; dc < 3; dc++)
+                pencilMarks[(br + dr) * 9 + (bc + dc)].delete(n); // same box
+          }
+
           render();
           const el = document.getElementById("c" + selected);
-          if (el && !given[selected] && n !== 0) el.classList.add("user");
+          if (el && !given[selected] && board[selected] !== 0)
+            el.classList.add("user");
           updateHintTrigger();
           scheduleValidate();
         }
@@ -1616,6 +1807,15 @@
           }
           if (e.key === "Escape") {
             closeHint();
+            return;
+          }
+          // P = pen mode, C = pencil (candidate) mode
+          if (e.key === "p" || e.key === "P") {
+            setMode("pen");
+            return;
+          }
+          if (e.key === "c" || e.key === "C") {
+            setMode("pencil");
             return;
           }
           const mv = {
@@ -1740,6 +1940,7 @@
           board = [...digits];
           ocrSnap = [...digits];
           given = digits.map((v) => v !== 0);
+          pencilMarks = Array.from({ length: 81 }, () => new Set());
           selected = -1;
           conflicts = [];
           closeHint();
@@ -1810,6 +2011,7 @@
         /* ── reset / clear / new ─────────────────────────────────────── */
         function resetToOCR() {
           board = [...ocrSnap];
+          pencilMarks = Array.from({ length: 81 }, () => new Set());
           selected = -1;
           closeHint();
           document
@@ -1825,6 +2027,7 @@
           board = Array(81).fill(0);
           given = Array(81).fill(false);
           ocrSnap = Array(81).fill(0);
+          pencilMarks = Array.from({ length: 81 }, () => new Set());
           selected = -1;
           conflicts = [];
           closeHint();
@@ -1865,6 +2068,12 @@
         fileIn.addEventListener("change", (e) => handleFile(e.target.files[0]));
 
         /* ── button wiring ───────────────────────────────────────────── */
+        document
+          .getElementById("mode-pen")
+          .addEventListener("click", () => setMode("pen"));
+        document
+          .getElementById("mode-pencil")
+          .addEventListener("click", () => setMode("pencil"));
         document.getElementById("btn-hint").addEventListener("click", showHint);
         document
           .getElementById("hint-close")
