@@ -77,9 +77,6 @@ def _find_conflicts(board):
     return conflicts
 
 
-'''
-NOT REQUIRED
-
 def solve_sudoku(flat_board: list) -> dict:
     """
     Solve a sudoku puzzle.
@@ -93,16 +90,15 @@ def solve_sudoku(flat_board: list) -> dict:
             "conflicts": conflicts,
             "error":     "Conflicting digits detected — see highlighted cells.",
         }
-    copy   = flat_board[:]
+    copy = flat_board[:]
     solved = _backtrack(copy)
     return {
         "solved":    solved,
         "board":     copy if solved else flat_board,
         "conflicts": [],
         "error":     None if solved else
-                     "No valid solution exists. Check for incorrect given digits.",
+        "No valid solution exists. Check for incorrect given digits.",
     }
-'''
 
 
 def validate_board(flat_board: list) -> dict:
