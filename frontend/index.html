@@ -1049,6 +1049,162 @@
       }
 
       /* ═══════════════════════════════════════════════════════════
+   COMPLETION OVERLAY
+═══════════════════════════════════════════════════════════ */
+      #completion-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 500;
+        align-items: center;
+        justify-content: center;
+        background: rgba(13, 17, 23, 0.82);
+        backdrop-filter: blur(6px);
+        animation: overlay-in 0.35s ease;
+      }
+      #completion-overlay.on {
+        display: flex;
+      }
+      @keyframes overlay-in {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .completion-card {
+        position: relative;
+        background: var(--bg-card);
+        border: 1px solid var(--green-glow);
+        border-radius: 24px;
+        padding: 2.8rem 3rem 2.4rem;
+        text-align: center;
+        max-width: 380px;
+        width: calc(100vw - 3rem);
+        box-shadow:
+          0 0 60px rgba(63, 185, 80, 0.22),
+          0 20px 60px rgba(0, 0, 0, 0.6);
+        animation: card-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      @keyframes card-in {
+        from {
+          opacity: 0;
+          transform: scale(0.78) translateY(24px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      .completion-emoji {
+        font-size: 3.2rem;
+        line-height: 1;
+        margin-bottom: 1rem;
+        animation: emoji-bounce 0.6s cubic-bezier(0.34, 1.8, 0.64, 1) 0.2s both;
+      }
+      @keyframes emoji-bounce {
+        from {
+          transform: scale(0) rotate(-15deg);
+        }
+        to {
+          transform: scale(1) rotate(0deg);
+        }
+      }
+
+      .completion-title {
+        font-family: var(--display);
+        font-size: 1.9rem;
+        font-weight: 700;
+        font-style: italic;
+        color: var(--green);
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 24px var(--green-glow);
+      }
+
+      .completion-sub {
+        font-size: 0.85rem;
+        color: var(--text-2);
+        margin-bottom: 1.8rem;
+        line-height: 1.55;
+      }
+
+      .completion-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 26px;
+        background: var(--green);
+        color: #0d1117;
+        border: none;
+        border-radius: var(--r-md);
+        font-family: var(--font);
+        font-weight: 700;
+        font-size: 0.88rem;
+        cursor: pointer;
+        box-shadow: 0 0 20px var(--green-glow);
+        transition: all 0.15s;
+      }
+      .completion-btn:hover {
+        background: #4fc761;
+        box-shadow: 0 0 32px var(--green-glow);
+        transform: translateY(-1px);
+      }
+      .completion-btn:active {
+        transform: scale(0.97);
+      }
+
+      /* confetti particles */
+      .confetti-wrap {
+        position: absolute;
+        inset: -20px;
+        pointer-events: none;
+        overflow: hidden;
+        border-radius: 24px;
+      }
+      .confetti-piece {
+        position: absolute;
+        top: -12px;
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        opacity: 0;
+        animation: confetti-fall var(--dur) var(--delay) ease-in both;
+      }
+      @keyframes confetti-fall {
+        0% {
+          opacity: 1;
+          transform: translateY(0) rotate(0deg) scaleX(1);
+        }
+        80% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(var(--drop)) rotate(var(--spin))
+            scaleX(var(--flip));
+        }
+      }
+
+      /* grid cells glow green on completion */
+      #grid.completed .cell {
+        animation: cell-complete 0.5s ease both;
+      }
+      @keyframes cell-complete {
+        0% {
+          background: var(--bg-card);
+        }
+        50% {
+          background: rgba(63, 185, 80, 0.18);
+        }
+        100% {
+          background: var(--bg-card);
+        }
+      }
+
+      /* ═══════════════════════════════════════════════════════════
    IMAGE PANELS (filter stages + binary grid)
 ═══════════════════════════════════════════════════════════ */
       #panel-images {
@@ -1281,19 +1437,18 @@
               </svg>
               <span id="chip-txt">0 conflicts</span>
             </div>
-            <!-- colour legend -->
+            <!-- colour legend — always visible once board is shown -->
             <div
-              id="colour-legend"
               style="
                 display: flex;
-                gap: 10px;
-                flex-wrap: wrap;
+                flex-direction: column;
+                gap: 5px;
                 font-size: 0.67rem;
                 color: var(--text-3);
                 padding: 2px 0;
               "
             >
-              <span style="display: flex; align-items: center; gap: 5px">
+              <span style="display: flex; align-items: center; gap: 6px">
                 <span
                   style="
                     width: 10px;
@@ -1304,9 +1459,9 @@
                     flex-shrink: 0;
                   "
                 ></span>
-                Rule conflict (same digit in row/col/box)
+                Rule conflict (row / col / box)
               </span>
-              <span style="display: flex; align-items: center; gap: 5px">
+              <span style="display: flex; align-items: center; gap: 6px">
                 <span
                   style="
                     width: 10px;
@@ -1445,6 +1600,38 @@
       </section>
     </main>
 
+    <!-- ═══════════════════════════════════════════════════════
+         COMPLETION OVERLAY
+    ═══════════════════════════════════════════════════════ -->
+    <div id="completion-overlay">
+      <div class="completion-card">
+        <div class="confetti-wrap" id="confetti-wrap"></div>
+        <div class="completion-emoji">🎉</div>
+        <div class="completion-title">Puzzle Solved!</div>
+        <div class="completion-sub">
+          All 81 cells filled correctly.<br />
+          Well done — the puzzle is complete!
+        </div>
+        <button class="completion-btn" id="btn-completion-new">
+          <svg
+            viewBox="0 0 24 24"
+            style="
+              width: 15px;
+              height: 15px;
+              stroke: #0d1117;
+              fill: none;
+              stroke-width: 2.2;
+            "
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          Try Another Puzzle
+        </button>
+      </div>
+    </div>
+
     <script>
       /* ═══════════════════════════════════════════════════════════════════
    APP
@@ -1458,9 +1645,9 @@
         let ocrSnap = Array(81).fill(0);
         let selected = -1;
         let conflicts = [];
-        let solution = Array(81).fill(0); // correct solution, loaded after OCR
+        let solution = Array(81).fill(0);
         let solutionReady = false;
-        let valTimer = null;
+        let completionShown = false;
         let hintOpen = false;
         let inputMode = "pen"; // 'pen' | 'pencil'
         let pencilMarks = Array.from({ length: 81 }, () => new Set()); // per-cell candidate sets
@@ -1629,7 +1816,7 @@
               board[i] !== 0 &&
               board[i] !== solution[i]
             ) {
-              el.classList.add("warn"); // wrong position — doesn't match solution
+              el.classList.add("warn");
             }
             if (i === selected) el.classList.add("selected");
             else if (sr >= 0) {
@@ -1886,12 +2073,12 @@
           }
 
           render();
-          updateChip();
           const el = document.getElementById("c" + selected);
           if (el && !given[selected] && board[selected] !== 0)
             el.classList.add("user");
           updateHintTrigger();
-          scheduleValidate();
+          updateChip(); // immediate wrong-placement + completion check
+          scheduleValidate(); // async conflict check from server
         }
 
         /* keyboard */
@@ -1995,7 +2182,6 @@
 
         function updateChip() {
           const nConflict = conflicts.length;
-          // Count user-entered cells that don't match the solution
           const nWrong = solutionReady
             ? board.filter((v, i) => !given[i] && v !== 0 && v !== solution[i])
                 .length
@@ -2014,6 +2200,76 @@
             $chip.classList.add("on");
           } else {
             $chip.classList.remove("on");
+          }
+
+          checkCompletion();
+        }
+
+        /* ── completion detection ────────────────────────────────────────── */
+        function checkCompletion() {
+          if (completionShown) return;
+          // All 81 filled?
+          if (board.some((v) => v === 0)) return;
+          // No rule conflicts?
+          if (conflicts.length > 0) return;
+          // Solution matches (if we have it)?
+          if (solutionReady) {
+            if (board.some((v, i) => v !== solution[i])) return;
+          }
+          // All checks passed — celebrate!
+          completionShown = true;
+          setTimeout(showCompletion, 180); // tiny delay so last render paints first
+        }
+
+        function showCompletion() {
+          // Flash all cells green
+          const grid = document.getElementById("grid");
+          grid.classList.add("completed");
+          setTimeout(() => grid.classList.remove("completed"), 900);
+
+          // Spawn confetti
+          spawnConfetti();
+
+          // Show overlay
+          document.getElementById("completion-overlay").classList.add("on");
+        }
+
+        function spawnConfetti() {
+          const wrap = document.getElementById("confetti-wrap");
+          wrap.innerHTML = "";
+          const COLORS = [
+            "#3fb950",
+            "#388bfd",
+            "#a371f7",
+            "#f85149",
+            "#d29922",
+            "#79c0ff",
+            "#56d364",
+            "#ff7b72",
+          ];
+          const COUNT = 52;
+          for (let i = 0; i < COUNT; i++) {
+            const el = document.createElement("div");
+            el.className = "confetti-piece";
+            const left = Math.random() * 100;
+            const drop = 260 + Math.random() * 120;
+            const spin = Math.round(Math.random() * 720 - 360);
+            const flip = Math.random() > 0.5 ? -1 : 1;
+            const dur = 0.9 + Math.random() * 0.7;
+            const delay = Math.random() * 0.5;
+            const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+            // vary shape: squares and thin rectangles
+            const w = Math.random() > 0.4 ? 7 : 4;
+            const h = Math.random() > 0.4 ? 7 : 14;
+            el.style.cssText = `
+              left:${left}%;
+              width:${w}px; height:${h}px;
+              background:${color};
+              border-radius:${Math.random() > 0.5 ? "50%" : "2px"};
+              --drop:${drop}px; --spin:${spin}deg; --flip:${flip};
+              --dur:${dur}s; --delay:${delay}s;
+            `;
+            wrap.appendChild(el);
           }
         }
 
@@ -2060,17 +2316,19 @@
           conflicts = [];
           solution = Array(81).fill(0);
           solutionReady = false;
+          completionShown = false;
           closeHint();
           $chip.classList.remove("on");
+          document.getElementById("completion-overlay").classList.remove("on");
           $dcount.textContent = digits.filter(Boolean).length;
           $dinfo.classList.add("on");
           setOcrBadge(mode === "cnn" ? "cnn" : "knn");
           render();
           runValidate();
-          fetchSolution(digits); // silently pre-compute the correct solution
+          fetchSolution(digits);
         }
 
-        /* ── fetch solution (silent — used only for wrong-placement check) ── */
+        /* ── fetch solution silently (for wrong-placement + completion check) ── */
         async function fetchSolution(digits) {
           try {
             const res = await fetch(`${API}/api/solve`, {
@@ -2082,10 +2340,11 @@
             if (data.solved && data.board) {
               solution = data.board;
               solutionReady = true;
-              render(); // re-render with solution context
+              render();
+              updateChip();
             }
           } catch {
-            // Backend offline — solution check unavailable; no visual change
+            // Backend offline — solution check unavailable
           }
         }
 
@@ -2134,18 +2393,7 @@
               1, 7, 0, 0, 0, 2, 0, 0, 0, 6, 0, 6, 0, 0, 0, 0, 2, 8, 0, 0, 0, 0,
               4, 1, 9, 0, 0, 5, 0, 0, 0, 0, 8, 0, 0, 7, 9,
             ];
-            // Known correct solution for the demo puzzle (used offline)
-            const demoSolution = [
-              5, 3, 4, 6, 7, 8, 9, 1, 2, 6, 7, 2, 1, 9, 5, 3, 4, 8, 1, 9, 8, 3,
-              4, 2, 5, 6, 7, 8, 5, 9, 7, 6, 1, 4, 2, 3, 4, 2, 6, 8, 5, 3, 7, 9,
-              1, 7, 1, 3, 9, 2, 4, 8, 5, 6, 9, 6, 1, 5, 3, 7, 2, 8, 4, 2, 8, 7,
-              4, 1, 9, 6, 3, 5, 3, 4, 5, 2, 8, 6, 1, 7, 9,
-            ];
             loadBoard(demo, "knn");
-            // Provide the offline solution directly (skip the fetch attempt)
-            solution = demoSolution;
-            solutionReady = true;
-            render();
             setPills(3);
             $upload.style.display = "none";
             $board.classList.add("on");
@@ -2164,10 +2412,9 @@
           closeHint();
           document
             .querySelectorAll(".cell")
-            .forEach((c) => c.classList.remove("conflict", "user", "warn"));
+            .forEach((c) => c.classList.remove("conflict", "user"));
           $tip.classList.add("on");
           runValidate();
-          updateChip();
           setStatus("success", "Board reset to OCR result.", true);
           render();
         }
@@ -2178,11 +2425,13 @@
           ocrSnap = Array(81).fill(0);
           solution = Array(81).fill(0);
           solutionReady = false;
+          completionShown = false;
           pencilMarks = Array.from({ length: 81 }, () => new Set());
           selected = -1;
           conflicts = [];
           closeHint();
           $chip.classList.remove("on");
+          document.getElementById("completion-overlay").classList.remove("on");
           document
             .querySelectorAll(".cell")
             .forEach((c) =>
@@ -2238,6 +2487,9 @@
           .getElementById("btn-clear")
           .addEventListener("click", clearAll);
         document.getElementById("btn-new").addEventListener("click", uploadNew);
+        document
+          .getElementById("btn-completion-new")
+          .addEventListener("click", uploadNew);
 
         /* ── health check on load ────────────────────────────────────── */
         (async () => {
