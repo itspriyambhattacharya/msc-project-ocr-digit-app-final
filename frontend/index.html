@@ -851,6 +851,93 @@
         opacity: 0.45;
         cursor: default;
       }
+      /* ── answer pill (deterministic — only correct digit shown) ── */
+      .hint-digit.answer {
+        width: 44px;
+        height: 44px;
+        font-size: 1.3rem;
+        background: rgba(63, 185, 80, 0.18);
+        border-color: var(--green);
+        color: var(--green);
+        box-shadow: 0 0 16px rgba(63, 185, 80, 0.35);
+        cursor: pointer;
+      }
+      .hint-digit.answer:hover {
+        background: rgba(63, 185, 80, 0.3);
+        box-shadow: 0 0 24px rgba(63, 185, 80, 0.5);
+        transform: scale(1.1);
+      }
+      /* ── dependency section (indeterminate cell) ─────────────── */
+      .hint-dep-header {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--amber);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+      .hint-dep-header svg {
+        width: 12px;
+        height: 12px;
+        stroke: var(--amber);
+        fill: none;
+        stroke-width: 2.2;
+        flex-shrink: 0;
+      }
+      .hint-dep-list {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .hint-dep-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.72rem;
+        line-height: 1.5;
+        color: var(--text-2);
+      }
+      .hint-dep-cell-ref {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 8px;
+        border-radius: var(--r-sm);
+        background: rgba(210, 153, 34, 0.14);
+        border: 1px solid rgba(210, 153, 34, 0.38);
+        color: var(--amber);
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+      .hint-dep-cell-ref:hover {
+        background: rgba(210, 153, 34, 0.26);
+        border-color: var(--amber);
+        transform: translateY(-1px);
+      }
+      .hint-dep-elim-badge {
+        display: inline-block;
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        background: rgba(210, 153, 34, 0.14);
+        border: 1px solid rgba(210, 153, 34, 0.25);
+        color: var(--amber);
+        font-family: var(--mono);
+      }
+      /* grid highlight for dependency cells */
+      .cell.hint-dep {
+        outline: 2px solid var(--amber) !important;
+        outline-offset: -2px;
+        background: rgba(210, 153, 34, 0.1) !important;
+        z-index: 3;
+      }
 
       .hint-no-cands {
         font-size: 0.76rem;
@@ -1533,7 +1620,9 @@
                 <button id="hint-close">✕</button>
               </div>
               <div class="hint-candidates-section">
-                <div class="hint-section-label">Valid candidates</div>
+                <div class="hint-section-label" id="hint-sec-label">
+                  Valid candidates
+                </div>
                 <div class="hint-cands-row" id="hint-cands-row"></div>
               </div>
               <div class="hint-logic-section" id="hint-logic-section"></div>
@@ -1839,61 +1928,159 @@
 
         /* ═══════════════════════════════════════════════════════════════
      HINT LOGIC
-     For a selected cell, compute:
-       - which digits are valid candidates
-       - for each blocked digit, WHY (row / column / box)
+     ─────────────────────────────────────────────────────────────
+     computeHint(idx)
+       Returns { d: reasons[] } for each digit 1–9.
+       Empty reasons array → digit is a valid constraint candidate.
+       Non-empty → blocked, with row/col/box explanation.
+
+     showHint()
+       Three cases depending on solution availability:
+
+       CASE A — no solution yet (solutionReady = false)
+         Show all constraint-valid candidates (old behaviour).
+
+       CASE B — solution ready AND exactly 1 valid candidate
+         That digit IS the answer. Show only it as a large green
+         "answer" pill. This is the DETERMINISTIC case: constraints
+         alone uniquely determine the digit for this cell right now.
+
+       CASE C — solution ready AND multiple valid candidates
+         The cell is INDETERMINATE by constraints alone. We know
+         the correct digit from the solution, but other empty cells
+         must be filled first before constraints narrow this cell
+         down to one option.
+         For each wrong valid candidate d (≠ solution[idx]), find
+         the empty peer cell (same row/col/box) whose solution value
+         equals d — that peer, once filled, will eliminate d and
+         bring this cell one step closer to being deterministic.
+         Show those "dependency cells" with amber highlights on the
+         grid so the user knows which cells to solve first.
   ═══════════════════════════════════════════════════════════════ */
+
+        // Track which dependency cells are currently highlighted on the grid
+        let _hintDepCells = new Set();
+
+        function _clearDepHighlights() {
+          _hintDepCells.forEach((i) => {
+            const el = document.getElementById("c" + i);
+            if (el) el.classList.remove("hint-dep");
+          });
+          _hintDepCells.clear();
+        }
+
+        function _applyDepHighlights(idxSet) {
+          _clearDepHighlights();
+          idxSet.forEach((i) => {
+            _hintDepCells.add(i);
+            const el = document.getElementById("c" + i);
+            if (el) el.classList.add("hint-dep");
+          });
+        }
+
         function computeHint(idx) {
           const row = Math.floor(idx / 9);
           const col = idx % 9;
           const br = Math.floor(row / 3) * 3;
           const bc = Math.floor(col / 3) * 3;
-
           const result = {};
 
           for (let d = 1; d <= 9; d++) {
             const reasons = [];
 
-            // Row check — which column in the same row has this digit?
+            // Row check
             for (let c2 = 0; c2 < 9; c2++) {
               if (c2 !== col && board[row * 9 + c2] === d) {
                 reasons.push({
                   type: "row",
-                  detail: `row ${row + 1}, column ${c2 + 1}`,
+                  detail: `row ${row + 1}, col ${c2 + 1}`,
                 });
                 break;
               }
             }
-
-            // Column check — which row in the same column has this digit?
+            // Column check
             for (let r2 = 0; r2 < 9; r2++) {
               if (r2 !== row && board[r2 * 9 + col] === d) {
                 reasons.push({
                   type: "col",
-                  detail: `column ${col + 1}, row ${r2 + 1}`,
+                  detail: `col ${col + 1}, row ${r2 + 1}`,
                 });
                 break;
               }
             }
-
-            // Box check — which cell in the same 3×3 box has this digit?
+            // Box check
             outer: for (let dr = 0; dr < 3; dr++) {
               for (let dc = 0; dc < 3; dc++) {
                 const ni = (br + dr) * 9 + (bc + dc);
                 if (ni !== idx && board[ni] === d) {
                   reasons.push({
                     type: "box",
-                    detail: `the 3×3 box (row ${br + dr + 1}, col ${bc + dc + 1})`,
+                    detail: `3×3 box (R${br + dr + 1} C${bc + dc + 1})`,
                   });
                   break outer;
                 }
               }
             }
-
-            result[d] = reasons; // empty array = valid candidate
+            result[d] = reasons;
           }
-
           return result;
+        }
+
+        /*
+         * For an indeterminate cell at `idx`, find which currently-empty
+         * peer cells (same row / col / box) must be filled before this
+         * cell becomes deterministic.
+         *
+         * For each wrong valid candidate d (≠ solution[idx]):
+         *   Find an empty peer whose solution value = d.
+         *   That peer, once filled with d, will block d here and
+         *   eliminate it from this cell's candidates.
+         *
+         * Returns an array of:
+         *   { cellIdx, cellRow, cellCol, eliminates: d }
+         */
+        function computeDependencies(idx, validNums) {
+          if (!solutionReady) return [];
+          const correctDigit = solution[idx];
+          const wrongCandidates = validNums.filter((d) => d !== correctDigit);
+
+          const row = Math.floor(idx / 9);
+          const col = idx % 9;
+          const br = Math.floor(row / 3) * 3;
+          const bc = Math.floor(col / 3) * 3;
+
+          // Collect all peer cell indices (row ∪ col ∪ box, excluding self)
+          const peers = new Set();
+          for (let j = 0; j < 9; j++) {
+            if (j !== col) peers.add(row * 9 + j); // same row
+            if (j !== row) peers.add(j * 9 + col); // same col
+          }
+          for (let dr = 0; dr < 3; dr++)
+            for (let dc = 0; dc < 3; dc++) {
+              const ni = (br + dr) * 9 + (bc + dc);
+              if (ni !== idx) peers.add(ni);
+            }
+
+          const deps = [];
+          const seen = new Set(); // avoid listing same cell twice
+          for (const d of wrongCandidates) {
+            for (const pi of peers) {
+              // The dep cell must be: currently empty AND solution value = d
+              if (board[pi] === 0 && solution[pi] === d && !seen.has(pi)) {
+                seen.add(pi);
+                const pr = Math.floor(pi / 9);
+                const pc = pi % 9;
+                deps.push({
+                  cellIdx: pi,
+                  cellRow: pr + 1,
+                  cellCol: pc + 1,
+                  eliminates: d,
+                });
+                break; // one dep cell per wrong candidate is enough
+              }
+            }
+          }
+          return deps;
         }
 
         function showHint() {
@@ -1911,70 +2098,216 @@
             .map(Number)
             .filter((d) => analysis[d].length > 0);
 
-          /* ── Candidates row ─────────────────────────────── */
           $hintCandsRow.innerHTML = "";
-          if (validNums.length === 0) {
-            $hintCandsRow.innerHTML = `<div class="hint-no-cands">No valid digit fits here — check for conflicts above.</div>`;
-          } else {
-            for (let d = 1; d <= 9; d++) {
-              const pill = document.createElement("div");
-              pill.className =
-                "hint-digit " +
-                (analysis[d].length === 0 ? "valid" : "blocked");
-              pill.textContent = d;
-              if (analysis[d].length === 0) {
-                // Clicking a valid candidate digit enters it into the cell
-                pill.title = `Place ${d} here`;
-                pill.addEventListener("click", () => {
-                  enterDigit(d);
-                  closeHint();
-                });
-              }
-              $hintCandsRow.appendChild(pill);
-            }
-          }
-
-          /* ── Logic / reasoning section ──────────────────── */
           $hintLogic.innerHTML = "";
+          _clearDepHighlights();
+          // Reset section label — Case C may have changed it
+          const _secLabel = document.getElementById("hint-sec-label");
+          if (_secLabel) _secLabel.textContent = "Valid candidates";
 
-          // Valid digits explanation first
-          if (validNums.length > 0) {
-            const row1 = document.createElement("div");
-            row1.className = "hint-valid-summary";
-            row1.innerHTML =
-              `<strong>${validNums.join(", ")}</strong> — ` +
-              `not found in this row, column, or 3×3 box. ` +
-              `${
-                validNums.length === 1
-                  ? "Only one option — this cell is determined."
-                  : "Any of these could go here."
-              }`;
-            $hintLogic.appendChild(row1);
+          /* ──────────────────────────────────────────────────────────
+             CASE A — No solution available yet
+             Show all valid constraint candidates (unchanged old behaviour).
+          ────────────────────────────────────────────────────────── */
+          if (!solutionReady) {
+            // Candidates row — all valid digits shown
+            if (validNums.length === 0) {
+              $hintCandsRow.innerHTML = `<div class="hint-no-cands">No valid digit fits here — check for conflicts above.</div>`;
+            } else {
+              for (let d = 1; d <= 9; d++) {
+                const pill = document.createElement("div");
+                pill.className =
+                  "hint-digit " +
+                  (analysis[d].length === 0 ? "valid" : "blocked");
+                pill.textContent = d;
+                if (analysis[d].length === 0) {
+                  pill.title = `Place ${d} here`;
+                  pill.addEventListener("click", () => {
+                    enterDigit(d);
+                    closeHint();
+                  });
+                }
+                $hintCandsRow.appendChild(pill);
+              }
+              // Summary
+              const sum = document.createElement("div");
+              sum.className = "hint-valid-summary";
+              sum.innerHTML = `<strong>${validNums.join(", ")}</strong> — not found in this row, column, or 3×3 box. ${validNums.length === 1 ? "Only one option — this cell is determined." : "Any of these could go here."}`;
+              $hintLogic.appendChild(sum);
+            }
+            // Blocked reasons
+            _renderBlockedReasons(blocked, analysis);
+            $hintPanel.classList.add("on");
+            hintOpen = true;
+            return;
           }
 
-          // Blocked digits with individual reasons
+          /* ──────────────────────────────────────────────────────────
+             CASE B — Solution ready, exactly 1 valid candidate
+             DETERMINISTIC: constraints alone tell us the answer now.
+          ────────────────────────────────────────────────────────── */
+          if (validNums.length === 1) {
+            const answer = validNums[0]; // must equal solution[selected]
+
+            // Big green answer pill
+            const pill = document.createElement("div");
+            pill.className = "hint-digit answer";
+            pill.textContent = answer;
+            pill.title = `Place ${answer} here`;
+            pill.addEventListener("click", () => {
+              enterDigit(answer);
+              closeHint();
+            });
+            $hintCandsRow.appendChild(pill);
+
+            // Explanation
+            const sum = document.createElement("div");
+            sum.className = "hint-valid-summary";
+            sum.innerHTML = `<strong>${answer}</strong> is the only digit not yet present in this row, column, and 3×3 box. This cell is fully determined — click the digit above to place it.`;
+            $hintLogic.appendChild(sum);
+
+            // Still show why the other 8 are blocked
+            _renderBlockedReasons(blocked, analysis);
+            $hintPanel.classList.add("on");
+            hintOpen = true;
+            return;
+          }
+
+          /* ──────────────────────────────────────────────────────────
+             CASE C — Solution ready, multiple valid candidates
+             INDETERMINATE: correct digit known from solution, but
+             other cells must be solved first to make this one
+             deterministic by constraints.
+          ────────────────────────────────────────────────────────── */
+          if (validNums.length === 0) {
+            // Should not happen if there are no conflicts, but handle gracefully
+            $hintCandsRow.innerHTML = `<div class="hint-no-cands">No valid digit fits here — check for conflicts above.</div>`;
+            $hintPanel.classList.add("on");
+            hintOpen = true;
+            return;
+          }
+
+          const correctDigit = solution[selected];
+          const deps = computeDependencies(selected, validNums);
+
+          // ── Section label override
+          const secLabel = document.getElementById("hint-sec-label");
+          if (secLabel) secLabel.textContent = "Solve other cells first";
+
+          // ── Amber "dependencies required" notice instead of digit pills
+          const notice = document.createElement("div");
+          notice.style.cssText = `
+            display:flex; align-items:flex-start; gap:8px;
+            padding:10px 12px; border-radius:var(--r-md);
+            background:rgba(210,153,34,0.10);
+            border:1px solid rgba(210,153,34,0.30);
+            font-size:0.75rem; line-height:1.6; color:var(--text-2);
+          `;
+          notice.innerHTML = `
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--amber);fill:none;stroke-width:2.2;flex-shrink:0;margin-top:2px">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <span>
+              This cell cannot be determined yet —
+              <strong style="color:var(--amber)">${validNums.length} digits</strong>
+              (${validNums.join(", ")}) are all constraint-valid right now.
+              Fill the highlighted cells below first, then return here.
+            </span>
+          `;
+          $hintCandsRow.appendChild(notice);
+
+          // ── Dependency list in the logic section
+          if (deps.length > 0) {
+            const depHeader = document.createElement("div");
+            depHeader.className = "hint-dep-header";
+            depHeader.innerHTML = `
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+              Cells to solve before this one
+            `;
+            $hintLogic.appendChild(depHeader);
+
+            const depList = document.createElement("div");
+            depList.className = "hint-dep-list";
+
+            const depIdxSet = new Set(deps.map((d) => d.cellIdx));
+            _applyDepHighlights(depIdxSet);
+
+            deps.forEach(({ cellIdx, cellRow, cellCol, eliminates }) => {
+              const depRow = document.createElement("div");
+              depRow.className = "hint-dep-row";
+
+              const cellRef = document.createElement("span");
+              cellRef.className = "hint-dep-cell-ref";
+              cellRef.innerHTML = `R${cellRow} C${cellCol}`;
+              cellRef.title = `Jump to Row ${cellRow}, Column ${cellCol}`;
+              // Clicking jumps to that cell on the grid
+              cellRef.addEventListener("click", () => {
+                selectCell(cellIdx);
+                closeHint();
+              });
+
+              const elimBadge = document.createElement("span");
+              elimBadge.className = "hint-dep-elim-badge";
+              elimBadge.textContent = eliminates;
+
+              const text = document.createElement("span");
+              text.style.color = "var(--text-2)";
+              text.style.fontSize = "0.71rem";
+              text.innerHTML = `once filled, will eliminate <span style="color:var(--amber);font-family:var(--mono);font-weight:700">${eliminates}</span> as a candidate here`;
+
+              depRow.appendChild(cellRef);
+              depRow.appendChild(text);
+              depList.appendChild(depRow);
+            });
+
+            $hintLogic.appendChild(depList);
+
+            // Closing note
+            const note = document.createElement("div");
+            note.style.cssText =
+              "font-size:0.69rem;color:var(--text-3);padding-top:6px;border-top:1px solid var(--border);margin-top:4px;line-height:1.55;";
+            note.textContent = `After filling ${deps.length === 1 ? "that cell" : "those cells"}, open this hint again — the answer for this cell will appear.`;
+            $hintLogic.appendChild(note);
+          } else {
+            // deps is empty — all wrong candidates are blocked by already-filled cells,
+            // but solution is somehow ambiguous (shouldn't normally happen).
+            const fallback = document.createElement("div");
+            fallback.className = "hint-valid-summary";
+            fallback.innerHTML = `Constraint analysis shows multiple candidates (${validNums.join(", ")}). Keep filling other cells and try again.`;
+            $hintLogic.appendChild(fallback);
+          }
+
+          // Always show why blocked digits are blocked
+          _renderBlockedReasons(blocked, analysis);
+
+          $hintPanel.classList.add("on");
+          hintOpen = true;
+        }
+
+        /* ── Shared helper: render "digit X is blocked because…" rows ── */
+        function _renderBlockedReasons(blocked, analysis) {
+          if (blocked.length === 0) return;
+          const typeOrder = ["row", "col", "box"];
+          const typeLabels = { row: "row", col: "column", box: "3×3 box" };
+          const typeClass = {
+            row: "row-reason",
+            col: "col-reason",
+            box: "box-reason",
+          };
+
           for (const d of blocked) {
             const reasons = analysis[d];
             const row2 = document.createElement("div");
             row2.className = "hint-logic-row";
 
-            const typeOrder = ["row", "col", "box"];
-            const typeLabels = { row: "row", col: "column", box: "3×3 box" };
-            const typeClass = {
-              row: "row-reason",
-              col: "col-reason",
-              box: "box-reason",
-            };
-
-            // Deduplicate by type
             const seen = new Set();
-            const uniqueReasons = reasons.filter((r) => {
+            const unique = reasons.filter((r) => {
               if (seen.has(r.type)) return false;
               seen.add(r.type);
               return true;
             });
-
-            const pills = uniqueReasons
+            const pills = unique
               .sort(
                 (a, b) => typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type),
               )
@@ -1983,43 +2316,18 @@
                   `<span class="hint-logic-reason ${typeClass[r.type]}">${typeLabels[r.type]}</span>`,
               )
               .join("");
-
-            // Find the conflicting detail for the first reason
-            const firstR = uniqueReasons[0];
+            const firstR = unique[0];
             row2.innerHTML =
               `<span class="hint-logic-digit">${d}</span>` +
               `<span class="hint-logic-text">already in ${firstR.detail}${pills}</span>`;
-
             $hintLogic.appendChild(row2);
           }
-
-          // Highlight peers that caused eliminations
-          const eliminatorCells = new Set();
-          for (const d of blocked) {
-            const r = Math.floor(selected / 9),
-              c = selected % 9;
-            const br2 = Math.floor(r / 3) * 3,
-              bc2 = Math.floor(c / 3) * 3;
-            for (let c2 = 0; c2 < 9; c2++)
-              if (board[r * 9 + c2] === d && c2 !== c)
-                eliminatorCells.add(r * 9 + c2);
-            for (let r2 = 0; r2 < 9; r2++)
-              if (board[r2 * 9 + c] === d && r2 !== r)
-                eliminatorCells.add(r2 * 9 + c);
-            for (let dr = 0; dr < 3; dr++)
-              for (let dc = 0; dc < 3; dc++) {
-                const ni = (br2 + dr) * 9 + (bc2 + dc);
-                if (ni !== selected && board[ni] === d) eliminatorCells.add(ni);
-              }
-          }
-
-          $hintPanel.classList.add("on");
-          hintOpen = true;
         }
 
         function closeHint() {
           $hintPanel.classList.remove("on");
           hintOpen = false;
+          _clearDepHighlights();
           render();
         }
 
