@@ -11,41 +11,41 @@
     />
     <style>
       /* ═══════════════════════════════════════════════════════════
-   TOKENS
+   TOKENS — LIGHT THEME
 ═══════════════════════════════════════════════════════════ */
       :root {
-        --bg: #0d1117;
-        --bg-card: #161b22;
-        --bg-raised: #1c2333;
-        --bg-hover: #21293a;
-        --border: rgba(255, 255, 255, 0.07);
-        --border-mid: rgba(255, 255, 255, 0.13);
-        --border-hi: rgba(255, 255, 255, 0.22);
+        --bg: #f5f4f0;
+        --bg-card: #ffffff;
+        --bg-raised: #f0ede8;
+        --bg-hover: #e8e4de;
+        --border: rgba(0, 0, 0, 0.08);
+        --border-mid: rgba(0, 0, 0, 0.14);
+        --border-hi: rgba(0, 0, 0, 0.26);
 
-        --text: #e6edf3;
-        --text-2: #8b949e;
-        --text-3: #484f58;
+        --text: #1a1a1a;
+        --text-2: #555555;
+        --text-3: #999999;
 
-        --green: #3fb950;
-        --green-dim: rgba(63, 185, 80, 0.14);
-        --green-glow: rgba(63, 185, 80, 0.32);
+        --green: #1a7f37;
+        --green-dim: rgba(26, 127, 55, 0.1);
+        --green-glow: rgba(26, 127, 55, 0.25);
 
-        --blue: #388bfd;
-        --blue-dim: rgba(56, 139, 253, 0.14);
-        --blue-glow: rgba(56, 139, 253, 0.32);
+        --blue: #0969da;
+        --blue-dim: rgba(9, 105, 218, 0.1);
+        --blue-glow: rgba(9, 105, 218, 0.25);
 
-        --amber: #d29922;
-        --amber-dim: rgba(210, 153, 34, 0.14);
+        --amber: #9a6700;
+        --amber-dim: rgba(154, 103, 0, 0.1);
 
-        --red: #f85149;
-        --red-dim: rgba(248, 81, 73, 0.14);
-        --red-glow: rgba(248, 81, 73, 0.32);
+        --red: #cf222e;
+        --red-dim: rgba(207, 34, 46, 0.1);
+        --red-glow: rgba(207, 34, 46, 0.25);
 
-        --purple: #a371f7;
-        --purple-dim: rgba(163, 113, 247, 0.14);
+        --purple: #6639ba;
+        --purple-dim: rgba(102, 57, 186, 0.1);
 
-        --given-bg: rgba(56, 139, 253, 0.1);
-        --given-fg: #79c0ff;
+        --given-bg: rgba(9, 105, 218, 0.08);
+        --given-fg: #0550ae;
 
         --cell: 52px;
         --r-xs: 4px;
@@ -58,9 +58,9 @@
         --display: "Playfair Display", serif;
         --mono: "JetBrains Mono", monospace;
 
-        --sh-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-        --sh-md: 0 4px 16px rgba(0, 0, 0, 0.5);
-        --sh-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+        --sh-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+        --sh-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+        --sh-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
       }
 
       /* ═══════════════════════════════════════════════════════════
@@ -88,12 +88,12 @@
         background-image:
           radial-gradient(
             ellipse 80% 50% at 50% -10%,
-            rgba(63, 185, 80, 0.055) 0%,
+            rgba(26, 127, 55, 0.04) 0%,
             transparent 70%
           ),
           radial-gradient(
             ellipse 55% 35% at 85% 85%,
-            rgba(56, 139, 253, 0.04) 0%,
+            rgba(9, 105, 218, 0.03) 0%,
             transparent 70%
           );
       }
@@ -112,11 +112,12 @@
         align-items: center;
         justify-content: space-between;
         border-bottom: 1px solid var(--border);
-        background: rgba(13, 17, 23, 0.88);
+        background: rgba(245, 244, 240, 0.92);
         backdrop-filter: blur(14px);
         position: sticky;
         top: 0;
         z-index: 100;
+        box-shadow: var(--sh-sm);
       }
       .brand {
         display: flex;
@@ -145,7 +146,7 @@
         border-radius: 20px;
       }
 
-      /* ── step pills ─────────────────────────────────────────── */
+      /* step pills */
       .steps {
         display: flex;
         gap: 3px;
@@ -190,7 +191,7 @@
         background: var(--green);
       }
 
-      /* ── OCR mode badge ─────────────────────────────────────── */
+      /* OCR badge */
       #ocr-badge {
         display: none;
         align-items: center;
@@ -285,7 +286,9 @@
         overflow: hidden;
         transition:
           border-color 0.25s,
-          transform 0.15s;
+          transform 0.15s,
+          box-shadow 0.25s;
+        box-shadow: var(--sh-sm);
       }
       .drop-zone::before {
         content: "";
@@ -308,6 +311,7 @@
       .drop-zone.drag {
         border-color: var(--green);
         transform: translateY(-2px);
+        box-shadow: var(--sh-md);
       }
       .drop-zone input {
         position: absolute;
@@ -316,7 +320,6 @@
         cursor: pointer;
         z-index: 2;
       }
-
       .dz-icon {
         width: 60px;
         height: 60px;
@@ -340,6 +343,7 @@
         font-size: 1.25rem;
         font-weight: 700;
         margin-bottom: 5px;
+        color: var(--text);
       }
       .dz-sub {
         font-size: 0.8rem;
@@ -368,7 +372,7 @@
         gap: 8px;
         padding: 9px 22px;
         background: var(--green);
-        color: #0d1117;
+        color: #fff;
         border: none;
         border-radius: var(--r-md);
         font-weight: 700;
@@ -381,12 +385,12 @@
       .dz-cta svg {
         width: 15px;
         height: 15px;
-        stroke: #0d1117;
+        stroke: #fff;
         fill: none;
         stroke-width: 2;
       }
 
-      /* ── status bar ─────────────────────────────────────────── */
+      /* status bar */
       #status {
         display: flex;
         align-items: center;
@@ -447,6 +451,180 @@
       }
 
       /* ═══════════════════════════════════════════════════════════
+   SKELETON LOADER
+   Shows an 81-cell shimmer grid while OCR is running.
+   Appears immediately when file is selected — before any
+   server response — so the user sees action instantly.
+═══════════════════════════════════════════════════════════ */
+      #panel-skeleton {
+        display: none;
+      }
+      #panel-skeleton.on {
+        display: block;
+      }
+
+      .skeleton-wrap {
+        display: flex;
+        gap: 1.8rem;
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+      .skeleton-grid-shell {
+        border-radius: var(--r-lg);
+        overflow: hidden;
+        box-shadow:
+          var(--sh-md),
+          0 0 0 1px var(--border);
+        flex-shrink: 0;
+      }
+      #skeleton-grid {
+        display: grid;
+        grid-template-columns: repeat(9, var(--cell));
+        grid-template-rows: repeat(9, var(--cell));
+        background: var(--bg-card);
+      }
+      .sk-cell {
+        width: var(--cell);
+        height: var(--cell);
+        background: var(--bg-card);
+        border-right: 1px solid rgba(0, 0, 0, 0.07);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+        position: relative;
+        overflow: hidden;
+      }
+      .sk-cell[data-c="2"],
+      .sk-cell[data-c="5"] {
+        border-right: 2px solid rgba(0, 0, 0, 0.18);
+      }
+      .sk-cell[data-r="2"],
+      .sk-cell[data-r="5"] {
+        border-bottom: 2px solid rgba(0, 0, 0, 0.18);
+      }
+      .sk-cell[data-c="8"] {
+        border-right: none;
+      }
+      .sk-cell[data-r="8"] {
+        border-bottom: none;
+      }
+
+      /* shimmer sweep */
+      .sk-cell::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(26, 127, 55, 0.1) 40%,
+          rgba(26, 127, 55, 0.18) 50%,
+          rgba(26, 127, 55, 0.1) 60%,
+          transparent 100%
+        );
+        transform: translateX(-100%);
+        animation: shimmer 1.6s ease-in-out infinite;
+        animation-delay: calc(var(--sk-delay) * 0.04s);
+      }
+      @keyframes shimmer {
+        0% {
+          transform: translateX(-100%);
+        }
+        60%,
+        100% {
+          transform: translateX(100%);
+        }
+      }
+      /* inner blob (so cells aren't completely empty) */
+      .sk-cell::before {
+        content: "";
+        position: absolute;
+        top: 30%;
+        left: 28%;
+        width: 44%;
+        height: 40%;
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.06);
+        animation: sk-fade 1.6s ease-in-out infinite;
+        animation-delay: calc(var(--sk-delay) * 0.04s);
+      }
+      @keyframes sk-fade {
+        0%,
+        100% {
+          opacity: 0.7;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      /* skeleton side panel */
+      .skeleton-side {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        flex: 1;
+        min-width: 190px;
+        padding-top: 4px;
+      }
+      .sk-bar {
+        height: 36px;
+        border-radius: var(--r-md);
+        background: var(--bg-raised);
+        overflow: hidden;
+        position: relative;
+      }
+      .sk-bar::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(26, 127, 55, 0.12) 50%,
+          transparent 100%
+        );
+        transform: translateX(-100%);
+        animation: shimmer 1.8s ease-in-out infinite;
+        animation-delay: var(--sk-bar-delay, 0s);
+      }
+      .sk-bar.wide {
+        width: 100%;
+      }
+      .sk-bar.short {
+        width: 65%;
+      }
+      .sk-bar.tall {
+        height: 160px;
+      }
+
+      /* progress text under skeleton */
+      .skeleton-progress {
+        margin-top: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 15px;
+        border-radius: var(--r-md);
+        background: var(--amber-dim);
+        border: 1px solid var(--amber);
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--amber);
+        min-height: 40px;
+      }
+      .skeleton-progress .spinner {
+        width: 13px;
+        height: 13px;
+        border: 2px solid var(--amber);
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.75s linear infinite;
+        flex-shrink: 0;
+      }
+      #sk-stage-txt {
+        transition: opacity 0.3s;
+      }
+
+      /* ═══════════════════════════════════════════════════════════
    BOARD PANEL
 ═══════════════════════════════════════════════════════════ */
       #panel-board {
@@ -463,12 +641,12 @@
         flex-wrap: wrap;
       }
 
-      /* ── grid ──────────────────────────────────────────────── */
+      /* grid */
       .grid-shell {
         border-radius: var(--r-lg);
         overflow: hidden;
         box-shadow:
-          var(--sh-lg),
+          var(--sh-md),
           0 0 0 1px var(--border);
         flex-shrink: 0;
       }
@@ -489,22 +667,21 @@
         font-weight: 600;
         background: var(--bg-card);
         color: var(--text);
-        border-right: 1px solid rgba(255, 255, 255, 0.055);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+        border-right: 1px solid rgba(0, 0, 0, 0.07);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.07);
         cursor: pointer;
         transition: background 0.1s;
         user-select: none;
         -webkit-tap-highlight-color: transparent;
         position: relative;
       }
-      /* 3×3 box thick borders */
       .cell[data-c="2"],
       .cell[data-c="5"] {
-        border-right: 2px solid rgba(255, 255, 255, 0.18);
+        border-right: 2px solid rgba(0, 0, 0, 0.2);
       }
       .cell[data-r="2"],
       .cell[data-r="5"] {
-        border-bottom: 2px solid rgba(255, 255, 255, 0.18);
+        border-bottom: 2px solid rgba(0, 0, 0, 0.2);
       }
       .cell[data-c="8"] {
         border-right: none;
@@ -534,7 +711,7 @@
         z-index: 2;
       }
       .cell.peer {
-        background: rgba(56, 139, 253, 0.045);
+        background: rgba(9, 105, 218, 0.04);
       }
       .cell.conflict {
         background: var(--red-dim) !important;
@@ -542,11 +719,11 @@
         animation: shake 0.3s ease;
       }
       .cell.warn {
-        background: rgba(210, 153, 34, 0.12) !important;
+        background: rgba(154, 103, 0, 0.1) !important;
         color: var(--amber) !important;
       }
       .cell.hint-cand {
-        background: rgba(163, 113, 247, 0.1) !important;
+        background: rgba(102, 57, 186, 0.08) !important;
       }
       .cell:not(.given):not(.selected):hover {
         background: var(--bg-hover);
@@ -575,7 +752,7 @@
       }
 
       /* ═══════════════════════════════════════════════════════════
-   RIGHT PANEL — CONTROLS
+   CONTROLS
 ═══════════════════════════════════════════════════════════ */
       .ctrl-panel {
         display: flex;
@@ -585,7 +762,6 @@
         min-width: 190px;
       }
 
-      /* conflict chip */
       #conflict-chip {
         display: none;
         align-items: center;
@@ -595,7 +771,7 @@
         font-size: 0.76rem;
         font-weight: 600;
         background: var(--red-dim);
-        border: 1px solid rgba(248, 81, 73, 0.38);
+        border: 1px solid rgba(207, 34, 46, 0.28);
         color: var(--red);
       }
       #conflict-chip.on {
@@ -610,7 +786,6 @@
         flex-shrink: 0;
       }
 
-      /* digit count */
       #digit-info {
         font-size: 0.72rem;
         color: var(--text-3);
@@ -645,6 +820,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        box-shadow: var(--sh-sm);
       }
       .nk:hover {
         background: var(--bg-hover);
@@ -668,7 +844,6 @@
         box-shadow: none;
       }
 
-      /* section sub-label */
       .ctrl-label {
         font-size: 0.68rem;
         font-weight: 600;
@@ -699,6 +874,7 @@
         border: 1px solid var(--border-mid);
         background: var(--bg-card);
         color: var(--text-2);
+        box-shadow: var(--sh-sm);
       }
       .btn svg {
         width: 14px;
@@ -718,24 +894,24 @@
       .btn-hint {
         background: var(--purple-dim);
         color: var(--purple);
-        border-color: rgba(163, 113, 247, 0.4);
+        border-color: rgba(102, 57, 186, 0.3);
         font-weight: 600;
       }
       .btn-hint svg {
         stroke: var(--purple);
       }
       .btn-hint:hover {
-        background: rgba(163, 113, 247, 0.22);
-        color: #c59ffe;
+        background: rgba(102, 57, 186, 0.16);
+        color: #5228b0;
         border-color: var(--purple);
       }
 
-      /* ── HINT PANEL ─────────────────────────────────────────── */
+      /* Hint Panel */
       #hint-panel {
         display: none;
         flex-direction: column;
         gap: 0;
-        border: 1px solid rgba(163, 113, 247, 0.35);
+        border: 1px solid rgba(102, 57, 186, 0.28);
         border-radius: var(--r-lg);
         overflow: hidden;
         animation: hint-in 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -753,14 +929,13 @@
           transform: translateY(0) scale(1);
         }
       }
-
       .hint-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
         padding: 9px 13px;
-        background: rgba(163, 113, 247, 0.1);
-        border-bottom: 1px solid rgba(163, 113, 247, 0.2);
+        background: rgba(102, 57, 186, 0.07);
+        border-bottom: 1px solid rgba(102, 57, 186, 0.16);
       }
       .hint-title {
         font-size: 0.7rem;
@@ -784,7 +959,7 @@
         height: 20px;
         border-radius: 50%;
         background: transparent;
-        border: 1px solid rgba(163, 113, 247, 0.3);
+        border: 1px solid rgba(102, 57, 186, 0.25);
         color: var(--purple);
         cursor: pointer;
         font-size: 0.7rem;
@@ -796,12 +971,11 @@
         line-height: 1;
       }
       #hint-close:hover {
-        background: rgba(163, 113, 247, 0.2);
+        background: rgba(102, 57, 186, 0.14);
       }
-
       .hint-candidates-section {
         padding: 12px 13px 10px;
-        background: rgba(13, 17, 23, 0.6);
+        background: var(--bg-card);
       }
       .hint-section-label {
         font-size: 0.62rem;
@@ -811,8 +985,6 @@
         color: var(--text-3);
         margin-bottom: 8px;
       }
-
-      /* candidate digit pills */
       .hint-cands-row {
         display: flex;
         gap: 5px;
@@ -833,14 +1005,13 @@
         cursor: pointer;
       }
       .hint-digit.valid {
-        background: rgba(163, 113, 247, 0.18);
+        background: rgba(102, 57, 186, 0.1);
         border-color: var(--purple);
-        color: #c59ffe;
-        box-shadow: 0 0 8px rgba(163, 113, 247, 0.25);
+        color: var(--purple);
+        box-shadow: 0 0 8px rgba(102, 57, 186, 0.15);
       }
       .hint-digit.valid:hover {
-        background: rgba(163, 113, 247, 0.32);
-        box-shadow: 0 0 14px rgba(163, 113, 247, 0.4);
+        background: rgba(102, 57, 186, 0.18);
         transform: scale(1.08);
       }
       .hint-digit.blocked {
@@ -851,23 +1022,20 @@
         opacity: 0.45;
         cursor: default;
       }
-      /* ── answer pill (deterministic — only correct digit shown) ── */
       .hint-digit.answer {
         width: 44px;
         height: 44px;
         font-size: 1.3rem;
-        background: rgba(63, 185, 80, 0.18);
+        background: rgba(26, 127, 55, 0.1);
         border-color: var(--green);
         color: var(--green);
-        box-shadow: 0 0 16px rgba(63, 185, 80, 0.35);
+        box-shadow: 0 0 16px rgba(26, 127, 55, 0.2);
         cursor: pointer;
       }
       .hint-digit.answer:hover {
-        background: rgba(63, 185, 80, 0.3);
-        box-shadow: 0 0 24px rgba(63, 185, 80, 0.5);
+        background: rgba(26, 127, 55, 0.18);
         transform: scale(1.1);
       }
-      /* ── dependency section (indeterminate cell) ─────────────── */
       .hint-dep-header {
         font-size: 0.7rem;
         font-weight: 600;
@@ -904,8 +1072,8 @@
         gap: 4px;
         padding: 3px 8px;
         border-radius: var(--r-sm);
-        background: rgba(210, 153, 34, 0.14);
-        border: 1px solid rgba(210, 153, 34, 0.38);
+        background: var(--amber-dim);
+        border: 1px solid rgba(154, 103, 0, 0.28);
         color: var(--amber);
         font-family: var(--mono);
         font-size: 0.68rem;
@@ -915,7 +1083,7 @@
         white-space: nowrap;
       }
       .hint-dep-cell-ref:hover {
-        background: rgba(210, 153, 34, 0.26);
+        background: rgba(154, 103, 0, 0.16);
         border-color: var(--amber);
         transform: translateY(-1px);
       }
@@ -926,31 +1094,21 @@
         font-size: 0.62rem;
         font-weight: 700;
         letter-spacing: 0.06em;
-        background: rgba(210, 153, 34, 0.14);
-        border: 1px solid rgba(210, 153, 34, 0.25);
+        background: var(--amber-dim);
+        border: 1px solid rgba(154, 103, 0, 0.2);
         color: var(--amber);
         font-family: var(--mono);
       }
-      /* grid highlight for dependency cells */
-      .cell.hint-dep {
-        outline: 2px solid var(--amber) !important;
-        outline-offset: -2px;
-        background: rgba(210, 153, 34, 0.1) !important;
-        z-index: 3;
-      }
-
       .hint-no-cands {
         font-size: 0.76rem;
         color: var(--red);
         font-weight: 500;
         padding: 4px 0;
       }
-
-      /* reasoning section */
       .hint-logic-section {
         padding: 10px 13px 12px;
-        border-top: 1px solid rgba(163, 113, 247, 0.12);
-        background: var(--bg-card);
+        border-top: 1px solid rgba(102, 57, 186, 0.1);
+        background: var(--bg-raised);
         display: flex;
         flex-direction: column;
         gap: 5px;
@@ -983,22 +1141,21 @@
         margin-left: 4px;
       }
       .hint-logic-reason.row-reason {
-        background: rgba(248, 81, 73, 0.14);
+        background: var(--red-dim);
         color: var(--red);
       }
       .hint-logic-reason.col-reason {
-        background: rgba(56, 139, 253, 0.14);
+        background: var(--blue-dim);
         color: var(--blue);
       }
       .hint-logic-reason.box-reason {
-        background: rgba(210, 153, 34, 0.14);
+        background: var(--amber-dim);
         color: var(--amber);
       }
       .hint-logic-reason.valid-reason {
-        background: rgba(63, 185, 80, 0.14);
+        background: var(--green-dim);
         color: var(--green);
       }
-
       .hint-valid-summary {
         font-size: 0.72rem;
         color: var(--text-2);
@@ -1006,11 +1163,17 @@
         padding: 2px 0;
       }
       .hint-valid-summary strong {
-        color: #c59ffe;
+        color: var(--purple);
         font-family: var(--mono);
       }
+      .cell.hint-dep {
+        outline: 2px solid var(--amber) !important;
+        outline-offset: -2px;
+        background: rgba(154, 103, 0, 0.08) !important;
+        z-index: 3;
+      }
 
-      /* ── input mode toggle ──────────────────────────────────── */
+      /* input mode toggle */
       .mode-toggle {
         display: flex;
         gap: 4px;
@@ -1032,6 +1195,7 @@
         border: 1px solid var(--border-mid);
         background: var(--bg-card);
         color: var(--text-2);
+        box-shadow: var(--sh-sm);
       }
       .mode-btn svg {
         width: 12px;
@@ -1046,19 +1210,19 @@
         color: var(--text);
       }
       .mode-btn.active-pen {
-        background: rgba(56, 139, 253, 0.16);
+        background: rgba(9, 105, 218, 0.1);
         border-color: var(--blue);
         color: var(--blue);
         box-shadow: 0 0 10px var(--blue-dim);
       }
       .mode-btn.active-pencil {
-        background: rgba(163, 113, 247, 0.16);
+        background: rgba(102, 57, 186, 0.1);
         border-color: var(--purple);
         color: var(--purple);
         box-shadow: 0 0 10px var(--purple-dim);
       }
 
-      /* ── digit-val span (main confirmed digit inside cell) ───── */
+      /* digit-val span */
       .digit-val {
         position: relative;
         z-index: 1;
@@ -1068,7 +1232,7 @@
         line-height: 1;
       }
 
-      /* ── pencil marks in cells ──────────────────────────────── */
+      /* pencil marks */
       .pencil-marks {
         position: absolute;
         inset: 0;
@@ -1092,7 +1256,6 @@
       .pencil-marks span.on {
         opacity: 0.9;
       }
-      /* hide overlay when cell has a confirmed digit */
       .cell.has-digit .pencil-marks {
         visibility: hidden;
       }
@@ -1101,26 +1264,26 @@
         display: none;
       }
 
-      /* ── tip box ────────────────────────────────────────────── */
+      /* tip box */
       #tip {
         display: none;
         margin-top: 0.4rem;
         padding: 11px 15px;
         background: var(--blue-dim);
-        border: 1px solid rgba(56, 139, 253, 0.28);
+        border: 1px solid rgba(9, 105, 218, 0.22);
         border-radius: var(--r-md);
         font-size: 0.76rem;
-        color: #79c0ff;
+        color: #0550ae;
         line-height: 1.65;
       }
       #tip.on {
         display: block;
       }
       #tip strong {
-        color: #a5c9ff;
+        color: #0969da;
       }
 
-      /* ── board status (inline under grid) ──────────────────── */
+      /* board status */
       #board-status {
         display: flex;
         align-items: center;
@@ -1145,7 +1308,7 @@
         z-index: 500;
         align-items: center;
         justify-content: center;
-        background: rgba(13, 17, 23, 0.82);
+        background: rgba(245, 244, 240, 0.8);
         backdrop-filter: blur(6px);
         animation: overlay-in 0.35s ease;
       }
@@ -1160,7 +1323,6 @@
           opacity: 1;
         }
       }
-
       .completion-card {
         position: relative;
         background: var(--bg-card);
@@ -1171,8 +1333,8 @@
         max-width: 380px;
         width: calc(100vw - 3rem);
         box-shadow:
-          0 0 60px rgba(63, 185, 80, 0.22),
-          0 20px 60px rgba(0, 0, 0, 0.6);
+          0 0 60px rgba(26, 127, 55, 0.15),
+          0 20px 60px rgba(0, 0, 0, 0.12);
         animation: card-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
       @keyframes card-in {
@@ -1185,22 +1347,6 @@
           transform: scale(1) translateY(0);
         }
       }
-
-      .completion-emoji {
-        font-size: 3.2rem;
-        line-height: 1;
-        margin-bottom: 1rem;
-        animation: emoji-bounce 0.6s cubic-bezier(0.34, 1.8, 0.64, 1) 0.2s both;
-      }
-      @keyframes emoji-bounce {
-        from {
-          transform: scale(0) rotate(-15deg);
-        }
-        to {
-          transform: scale(1) rotate(0deg);
-        }
-      }
-
       .completion-title {
         font-family: var(--display);
         font-size: 1.9rem;
@@ -1208,23 +1354,20 @@
         font-style: italic;
         color: var(--green);
         margin-bottom: 0.5rem;
-        text-shadow: 0 0 24px var(--green-glow);
       }
-
       .completion-sub {
         font-size: 0.85rem;
         color: var(--text-2);
         margin-bottom: 1.8rem;
         line-height: 1.55;
       }
-
       .completion-btn {
         display: inline-flex;
         align-items: center;
         gap: 8px;
         padding: 11px 26px;
         background: var(--green);
-        color: #0d1117;
+        color: #fff;
         border: none;
         border-radius: var(--r-md);
         font-family: var(--font);
@@ -1235,15 +1378,12 @@
         transition: all 0.15s;
       }
       .completion-btn:hover {
-        background: #4fc761;
-        box-shadow: 0 0 32px var(--green-glow);
+        background: #1a9140;
         transform: translateY(-1px);
       }
       .completion-btn:active {
         transform: scale(0.97);
       }
-
-      /* confetti particles */
       .confetti-wrap {
         position: absolute;
         inset: -20px;
@@ -1274,8 +1414,6 @@
             scaleX(var(--flip));
         }
       }
-
-      /* grid cells glow green on completion */
       #grid.completed .cell {
         animation: cell-complete 0.5s ease both;
       }
@@ -1284,7 +1422,7 @@
           background: var(--bg-card);
         }
         50% {
-          background: rgba(63, 185, 80, 0.18);
+          background: rgba(26, 127, 55, 0.1);
         }
         100% {
           background: var(--bg-card);
@@ -1292,7 +1430,7 @@
       }
 
       /* ═══════════════════════════════════════════════════════════
-   IMAGE PANELS (filter stages + binary grid)
+   IMAGE PIPELINE PANELS
 ═══════════════════════════════════════════════════════════ */
       #panel-images {
         display: none;
@@ -1300,14 +1438,12 @@
       #panel-images.on {
         display: block;
       }
-
       .img-panels-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1rem;
         margin-top: 0.5rem;
       }
-
       .img-panel {
         background: var(--bg-card);
         border: 1px solid var(--border-mid);
@@ -1315,6 +1451,7 @@
         overflow: hidden;
         display: flex;
         flex-direction: column;
+        box-shadow: var(--sh-sm);
       }
       .img-panel-label {
         padding: 8px 12px;
@@ -1337,13 +1474,107 @@
         filter: contrast(1.2);
       }
 
+      /* team card */
+      .project-team {
+        background: var(--bg-card);
+        border: 1px solid var(--border-mid);
+        border-radius: var(--r-lg);
+        padding: 1.2rem 1.5rem;
+        box-shadow: var(--sh-md);
+      }
+      .team-title {
+        font-family: var(--display);
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--green);
+        margin-bottom: 0.8rem;
+        letter-spacing: 0.03em;
+      }
+      .team-list {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 0;
+      }
+      .team-list li {
+        background: var(--bg-raised);
+        border: 1px solid var(--border-mid);
+        color: var(--text);
+        padding: 8px 14px;
+        border-radius: var(--r-md);
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+      .team-list li:hover {
+        color: var(--green);
+        border-color: var(--green);
+        box-shadow: 0 0 12px var(--green-dim);
+        transform: translateY(-2px);
+      }
+
+      /* ═══════════════════════════════════════════════════════════
+   CELL-BY-CELL REVEAL ANIMATION
+   Each detected digit "pops" in one at a time after OCR returns.
+   .cell-scanning  — the cell currently being "read" by the scanner
+   .cell-revealed  — cell has been revealed; plays the pop-in keyframe
+═══════════════════════════════════════════════════════════ */
+      .cell-scanning {
+        background: rgba(26, 127, 55, 0.13) !important;
+        outline: 2px solid var(--green) !important;
+        outline-offset: -2px;
+        z-index: 4;
+        transition: background 0.08s;
+      }
+      /* digit pop-in: scale up from zero with a slight overshoot */
+      @keyframes cell-reveal-pop {
+        0% {
+          transform: scale(0.25);
+          opacity: 0;
+        }
+        65% {
+          transform: scale(1.18);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .cell-revealed .digit-val {
+        animation: cell-reveal-pop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      }
+      /* blank cells still get a brief green flash to show they were "scanned" */
+      @keyframes cell-scan-flash {
+        0% {
+          background: rgba(26, 127, 55, 0.18);
+        }
+        100% {
+          background: var(--bg-card);
+        }
+      }
+      .cell-scan-blank {
+        animation: cell-scan-flash 0.28s ease-out both;
+      }
+
+      /* counter badge shown in the sec-label during reveal */
+      #reveal-counter {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--green);
+        margin-left: 8px;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      #reveal-counter.on {
+        opacity: 1;
+      }
+
       @media (max-width: 640px) {
         .img-panels-grid {
           grid-template-columns: 1fr 1fr;
         }
-      }
-
-      @media (max-width: 640px) {
         :root {
           --cell: 36px;
         }
@@ -1368,54 +1599,9 @@
           display: none;
         }
       }
-
-      .project-team {
-        background: var(--bg-card);
-        border: 1px solid var(--border-mid);
-        border-radius: var(--r-lg);
-        padding: 1.2rem 1.5rem;
-        box-shadow: var(--sh-md);
-      }
-
-      .team-title {
-        font-family: var(--display);
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: var(--green);
-        margin-bottom: 0.8rem;
-        letter-spacing: 0.03em;
-      }
-
-      .team-list {
-        list-style: none;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        padding: 0;
-      }
-
-      .team-list li {
-        background: var(--bg-raised);
-        border: 1px solid var(--border-mid);
-        color: var(--text);
-        padding: 8px 14px;
-        border-radius: var(--r-md);
-        font-weight: 600;
-        transition: all 0.2s ease;
-      }
-
-      .team-list li:hover {
-        color: var(--green);
-        border-color: var(--green);
-        box-shadow: 0 0 12px var(--green-dim);
-        transform: translateY(-2px);
-      }
     </style>
   </head>
   <body>
-    <!-- ═══════════════════════════════════════════════════════
-     HEADER
-═══════════════════════════════════════════════════════ -->
     <header>
       <div class="brand">
         <span class="brand-name">Sudoku <em>OCR</em></span>
@@ -1433,9 +1619,6 @@
       </div>
     </header>
 
-    <!-- ═══════════════════════════════════════════════════════
-     MAIN
-═══════════════════════════════════════════════════════ -->
     <main>
       <section class="project-team">
         <p class="team-title">Project By</p>
@@ -1446,13 +1629,13 @@
           <li>Dr. Rajib Das</li>
         </ul>
       </section>
+
       <!-- ── 1. UPLOAD ──────────────────────────────────────────── -->
       <section id="panel-upload">
         <div class="sec-head">
           <div class="sec-num">1</div>
           <div class="sec-label">Upload a Sudoku image</div>
         </div>
-
         <div class="drop-zone" id="drop-zone">
           <input
             type="file"
@@ -1483,7 +1666,6 @@
             Choose Image
           </button>
         </div>
-
         <div id="status" class="idle">
           <div class="st-icon">
             <svg viewBox="0 0 24 24">
@@ -1496,24 +1678,44 @@
         </div>
       </section>
 
+      <!-- ── SKELETON — shown during OCR ──────────────────────── -->
+      <section id="panel-skeleton">
+        <div class="sec-head">
+          <div class="sec-num">2</div>
+          <div class="sec-label">Detecting grid &amp; classifying digits…</div>
+        </div>
+        <div class="skeleton-wrap">
+          <div class="skeleton-grid-shell">
+            <div id="skeleton-grid"></div>
+          </div>
+          <div class="skeleton-side">
+            <div class="sk-bar wide" style="--sk-bar-delay: 0s"></div>
+            <div class="sk-bar short" style="--sk-bar-delay: 0.15s"></div>
+            <div class="sk-bar tall" style="--sk-bar-delay: 0.3s"></div>
+            <div class="sk-bar wide" style="--sk-bar-delay: 0.45s"></div>
+            <div class="sk-bar short" style="--sk-bar-delay: 0.6s"></div>
+          </div>
+        </div>
+        <div class="skeleton-progress">
+          <div class="spinner"></div>
+          <span id="sk-stage-txt">Decoding image…</span>
+        </div>
+      </section>
+
       <!-- ── 2. BOARD ───────────────────────────────────────────── -->
       <section id="panel-board">
         <div class="sec-head">
           <div class="sec-num">2</div>
-          <div class="sec-label">Verify &amp; correct digits</div>
+          <div class="sec-label">
+            Verify &amp; correct digits<span id="reveal-counter"></span>
+          </div>
         </div>
-
         <div id="digit-info" class="on">
           OCR detected <strong id="dcount">0</strong> digits
         </div>
-
         <div class="board-wrap">
-          <!-- Grid -->
           <div class="grid-shell"><div id="grid"></div></div>
-
-          <!-- Controls -->
           <div class="ctrl-panel">
-            <!-- conflict chip -->
             <div id="conflict-chip">
               <svg viewBox="0 0 24 24">
                 <path
@@ -1524,7 +1726,6 @@
               </svg>
               <span id="chip-txt">0 conflicts</span>
             </div>
-            <!-- colour legend — always visible once board is shown -->
             <div
               style="
                 display: flex;
@@ -1554,7 +1755,7 @@
                     width: 10px;
                     height: 10px;
                     border-radius: 2px;
-                    background: rgba(210, 153, 34, 0.16);
+                    background: rgba(154, 103, 0, 0.12);
                     border: 1px solid var(--amber);
                     flex-shrink: 0;
                   "
@@ -1562,8 +1763,6 @@
                 Wrong placement (incorrect for this puzzle)
               </span>
             </div>
-
-            <!-- Input mode toggle -->
             <div>
               <div class="ctrl-label">Input Mode</div>
               <div class="mode-toggle">
@@ -1587,14 +1786,10 @@
                 </button>
               </div>
             </div>
-
-            <!-- Numpad -->
             <div>
               <div class="ctrl-label">Number Pad</div>
               <div class="numpad" id="numpad"></div>
             </div>
-
-            <!-- Hint trigger button — appears only when an empty cell is selected -->
             <div id="hint-trigger-wrap" style="display: none">
               <button class="btn btn-hint" id="btn-hint">
                 <svg viewBox="0 0 24 24">
@@ -1605,8 +1800,6 @@
                 Show hint for this cell
               </button>
             </div>
-
-            <!-- Hint Panel — shown after button click -->
             <div id="hint-panel">
               <div class="hint-header">
                 <div class="hint-title">
@@ -1627,8 +1820,6 @@
               </div>
               <div class="hint-logic-section" id="hint-logic-section"></div>
             </div>
-
-            <!-- Actions -->
             <div>
               <div class="ctrl-label">Actions</div>
               <div class="action-col">
@@ -1657,25 +1848,18 @@
                 </button>
               </div>
             </div>
-
-            <!-- Tip -->
             <div id="tip" class="on">
               <strong>Tip:</strong> <strong>Pen</strong> = confirm a digit
               (clears peers' pencil marks). <strong>Pencil</strong> = toggle
-              candidate notes in a 3×3 mini-grid. Press <strong>P</strong> /
-              <strong>C</strong> to switch modes. Click an empty cell then
+              candidate notes. Press <strong>P</strong> / <strong>C</strong> to
+              switch modes. Click an empty cell then
               <strong>Show hint</strong> for constraint reasoning. Arrow keys
               navigate.
             </div>
           </div>
-          <!-- /ctrl-panel -->
         </div>
-        <!-- /board-wrap -->
-
-        <!-- Board-level status -->
         <div id="board-status"></div>
       </section>
-      <!-- /panel-board -->
 
       <!-- ── 3. IMAGE PIPELINE PANELS ──────────────────────────── -->
       <section id="panel-images">
@@ -1683,23 +1867,18 @@
           <div class="sec-num">3</div>
           <div class="sec-label">OCR pipeline — image stages</div>
         </div>
-        <div class="img-panels-grid" id="img-panels-grid">
-          <!-- populated by JS after OCR -->
-        </div>
+        <div class="img-panels-grid" id="img-panels-grid"></div>
       </section>
     </main>
 
-    <!-- ═══════════════════════════════════════════════════════
-         COMPLETION OVERLAY
-    ═══════════════════════════════════════════════════════ -->
+    <!-- COMPLETION OVERLAY -->
     <div id="completion-overlay">
       <div class="completion-card">
         <div class="confetti-wrap" id="confetti-wrap"></div>
-        <!-- <div class="completion-emoji"></div> -->
         <div class="completion-title">Puzzle Solved!</div>
         <div class="completion-sub">
-          All 81 cells filled correctly.<br />
-          Well done — the puzzle is complete!
+          All 81 cells filled correctly.<br />Well done — the puzzle is
+          complete!
         </div>
         <button class="completion-btn" id="btn-completion-new">
           <svg
@@ -1707,7 +1886,7 @@
             style="
               width: 15px;
               height: 15px;
-              stroke: #0d1117;
+              stroke: #fff;
               fill: none;
               stroke-width: 2.2;
             "
@@ -1722,13 +1901,10 @@
     </div>
 
     <script>
-      /* ═══════════════════════════════════════════════════════════════════
-   APP
-═══════════════════════════════════════════════════════════════════ */
       const App = (() => {
         const API = window.location.origin;
 
-        /* ── state ───────────────────────────────────────────────────── */
+        /* ── state ─────────────────────────────────────────── */
         let board = Array(81).fill(0);
         let given = Array(81).fill(false);
         let ocrSnap = Array(81).fill(0);
@@ -1738,11 +1914,13 @@
         let solutionReady = false;
         let completionShown = false;
         let hintOpen = false;
-        let inputMode = "pen"; // 'pen' | 'pencil'
-        let pencilMarks = Array.from({ length: 81 }, () => new Set()); // per-cell candidate sets
+        let inputMode = "pen";
+        let pencilMarks = Array.from({ length: 81 }, () => new Set());
+        let valTimer;
 
-        /* ── element refs ────────────────────────────────────────────── */
+        /* ── element refs ──────────────────────────────────── */
         const $upload = document.getElementById("panel-upload");
+        const $skeleton = document.getElementById("panel-skeleton");
         const $board = document.getElementById("panel-board");
         const $imgPnl = document.getElementById("panel-images");
         const $imgGrid = document.getElementById("img-panels-grid");
@@ -1760,7 +1938,7 @@
         const fileIn = document.getElementById("file-in");
         const dropZone = document.getElementById("drop-zone");
 
-        /* ── status helpers ──────────────────────────────────────────── */
+        /* ── status helpers ────────────────────────────────── */
         const ICONS = {
           idle: `<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
           loading: `<div class="spinner"></div>`,
@@ -1809,7 +1987,72 @@
             mode === "cnn" ? "CNN Active" : "kNN Fallback";
         }
 
-        /* ── build grid & numpad ─────────────────────────────────────── */
+        /* ── skeleton grid ────────────────────────────────────
+         Build 81 shimmer cells.  Each cell gets a CSS custom
+         property --sk-delay (0-80) so the shimmer wave sweeps
+         diagonally across the grid, giving a sense of progress.
+      ──────────────────────────────────────────────────────── */
+        function buildSkeletonGrid() {
+          const el = document.getElementById("skeleton-grid");
+          el.innerHTML = "";
+          for (let i = 0; i < 81; i++) {
+            const r = Math.floor(i / 9),
+              c = i % 9;
+            const d = document.createElement("div");
+            d.className = "sk-cell";
+            d.dataset.r = r;
+            d.dataset.c = c;
+            // Diagonal wave: cells along the same anti-diagonal share the same delay
+            d.style.setProperty("--sk-delay", r + c);
+            el.appendChild(d);
+          }
+        }
+
+        /* ── progressive stage text while waiting ─────────────
+         Cycles through descriptive messages every ~1.4s so the
+         user can see which OCR stage is running.
+      ──────────────────────────────────────────────────────── */
+        const STAGE_MSGS = [
+          "Decoding image…",
+          "Converting to greyscale…",
+          "Detecting Sudoku grid corners…",
+          "Applying perspective correction…",
+          "Extracting 81 cells…",
+          "Binarising cell images…",
+          "Running blank-cell detection…",
+          "Classifying digits with DigitCNN…",
+          "Applying TTA (8-pass averaging)…",
+          "Running constraint correction…",
+          "Almost there…",
+        ];
+        let _stageTimer = null;
+        let _stageIdx = 0;
+
+        function startStageCycler() {
+          _stageIdx = 0;
+          const txt = document.getElementById("sk-stage-txt");
+          if (txt) txt.textContent = STAGE_MSGS[0];
+          _stageTimer = setInterval(() => {
+            _stageIdx = (_stageIdx + 1) % STAGE_MSGS.length;
+            const t = document.getElementById("sk-stage-txt");
+            if (t) {
+              t.style.opacity = "0";
+              setTimeout(() => {
+                t.textContent = STAGE_MSGS[_stageIdx];
+                t.style.opacity = "1";
+              }, 160);
+            }
+          }, 1400);
+        }
+
+        function stopStageCycler() {
+          if (_stageTimer) {
+            clearInterval(_stageTimer);
+            _stageTimer = null;
+          }
+        }
+
+        /* ── build interactive grid & numpad ──────────────── */
         function buildGrid() {
           const el = document.getElementById("grid");
           el.innerHTML = "";
@@ -1822,14 +2065,10 @@
             d.dataset.r = r;
             d.dataset.c = c;
             d.addEventListener("click", () => selectCell(i));
-
-            // Main digit span — updated by render(), never wiped
             const dv = document.createElement("span");
             dv.className = "digit-val";
             dv.id = "dv" + i;
             d.appendChild(dv);
-
-            // Pencil marks overlay — 9 tiny spans (digits 1-9)
             const pm = document.createElement("div");
             pm.className = "pencil-marks";
             pm.id = "pm" + i;
@@ -1861,7 +2100,7 @@
           el.appendChild(del);
         }
 
-        /* ── input mode ──────────────────────────────────────────────── */
+        /* ── input mode ──────────────────────────────────── */
         function setMode(mode) {
           inputMode = mode;
           document.getElementById("mode-pen").className =
@@ -1870,32 +2109,25 @@
             "mode-btn" + (mode === "pencil" ? " active-pencil" : "");
         }
 
-        /* ── render ──────────────────────────────────────────────────── */
+        /* ── render ──────────────────────────────────────── */
         function render() {
           const sr = selected >= 0 ? Math.floor(selected / 9) : -1;
           const sc = selected >= 0 ? selected % 9 : -1;
           const cSet = new Set(conflicts.flat());
-
           for (let i = 0; i < 81; i++) {
             const el = document.getElementById("c" + i);
             if (!el) continue;
             const r = Math.floor(i / 9),
               c = i % 9;
-
             el.className = "cell";
             el.dataset.r = r;
             el.dataset.c = c;
-
-            // Update main digit (via dedicated span — never wipes overlay)
             const dvEl = document.getElementById("dv" + i);
             if (dvEl) dvEl.textContent = board[i] || "";
-
-            // Update pencil mark spans
             for (let k = 1; k <= 9; k++) {
               const s = document.getElementById("pm" + i + "_" + k);
               if (s) s.className = pencilMarks[i].has(k) ? "on" : "";
             }
-
             if (given[i]) el.classList.add("given");
             if (board[i] !== 0) el.classList.add("has-digit");
             if (cSet.has(i)) el.classList.add("conflict");
@@ -1904,9 +2136,8 @@
               !given[i] &&
               board[i] !== 0 &&
               board[i] !== solution[i]
-            ) {
+            )
               el.classList.add("warn");
-            }
             if (i === selected) el.classList.add("selected");
             else if (sr >= 0) {
               const sameBox =
@@ -1917,50 +2148,17 @@
           }
         }
 
-        /* ── hint trigger visibility ─────────────────────────────────── */
         function updateHintTrigger() {
-          // Show hint button only for empty, non-given cells
           const show =
             selected >= 0 && board[selected] === 0 && !given[selected];
           $hintTrigWrap.style.display = show ? "block" : "none";
           if (!show) closeHint();
         }
 
-        /* ═══════════════════════════════════════════════════════════════
-     HINT LOGIC
-     ─────────────────────────────────────────────────────────────
-     computeHint(idx)
-       Returns { d: reasons[] } for each digit 1–9.
-       Empty reasons array → digit is a valid constraint candidate.
-       Non-empty → blocked, with row/col/box explanation.
-
-     showHint()
-       Three cases depending on solution availability:
-
-       CASE A — no solution yet (solutionReady = false)
-         Show all constraint-valid candidates (old behaviour).
-
-       CASE B — solution ready AND exactly 1 valid candidate
-         That digit IS the answer. Show only it as a large green
-         "answer" pill. This is the DETERMINISTIC case: constraints
-         alone uniquely determine the digit for this cell right now.
-
-       CASE C — solution ready AND multiple valid candidates
-         The cell is INDETERMINATE by constraints alone. We know
-         the correct digit from the solution, but other empty cells
-         must be filled first before constraints narrow this cell
-         down to one option.
-         For each wrong valid candidate d (≠ solution[idx]), find
-         the empty peer cell (same row/col/box) whose solution value
-         equals d — that peer, once filled, will eliminate d and
-         bring this cell one step closer to being deterministic.
-         Show those "dependency cells" with amber highlights on the
-         grid so the user knows which cells to solve first.
-  ═══════════════════════════════════════════════════════════════ */
-
-        // Track which dependency cells are currently highlighted on the grid
+        /* ══════════════════════════════════════════════════
+         HINT LOGIC (unchanged from original)
+      ══════════════════════════════════════════════════ */
         let _hintDepCells = new Set();
-
         function _clearDepHighlights() {
           _hintDepCells.forEach((i) => {
             const el = document.getElementById("c" + i);
@@ -1968,7 +2166,6 @@
           });
           _hintDepCells.clear();
         }
-
         function _applyDepHighlights(idxSet) {
           _clearDepHighlights();
           idxSet.forEach((i) => {
@@ -1979,16 +2176,13 @@
         }
 
         function computeHint(idx) {
-          const row = Math.floor(idx / 9);
-          const col = idx % 9;
-          const br = Math.floor(row / 3) * 3;
-          const bc = Math.floor(col / 3) * 3;
+          const row = Math.floor(idx / 9),
+            col = idx % 9,
+            br = Math.floor(row / 3) * 3,
+            bc = Math.floor(col / 3) * 3;
           const result = {};
-
           for (let d = 1; d <= 9; d++) {
             const reasons = [];
-
-            // Row check
             for (let c2 = 0; c2 < 9; c2++) {
               if (c2 !== col && board[row * 9 + c2] === d) {
                 reasons.push({
@@ -1998,7 +2192,6 @@
                 break;
               }
             }
-            // Column check
             for (let r2 = 0; r2 < 9; r2++) {
               if (r2 !== row && board[r2 * 9 + col] === d) {
                 reasons.push({
@@ -2008,7 +2201,6 @@
                 break;
               }
             }
-            // Box check
             outer: for (let dr = 0; dr < 3; dr++) {
               for (let dc = 0; dc < 3; dc++) {
                 const ni = (br + dr) * 9 + (bc + dc);
@@ -2026,57 +2218,39 @@
           return result;
         }
 
-        /*
-         * For an indeterminate cell at `idx`, find which currently-empty
-         * peer cells (same row / col / box) must be filled before this
-         * cell becomes deterministic.
-         *
-         * For each wrong valid candidate d (≠ solution[idx]):
-         *   Find an empty peer whose solution value = d.
-         *   That peer, once filled with d, will block d here and
-         *   eliminate it from this cell's candidates.
-         *
-         * Returns an array of:
-         *   { cellIdx, cellRow, cellCol, eliminates: d }
-         */
         function computeDependencies(idx, validNums) {
           if (!solutionReady) return [];
           const correctDigit = solution[idx];
           const wrongCandidates = validNums.filter((d) => d !== correctDigit);
-
-          const row = Math.floor(idx / 9);
-          const col = idx % 9;
-          const br = Math.floor(row / 3) * 3;
-          const bc = Math.floor(col / 3) * 3;
-
-          // Collect all peer cell indices (row ∪ col ∪ box, excluding self)
+          const row = Math.floor(idx / 9),
+            col = idx % 9,
+            br = Math.floor(row / 3) * 3,
+            bc = Math.floor(col / 3) * 3;
           const peers = new Set();
           for (let j = 0; j < 9; j++) {
-            if (j !== col) peers.add(row * 9 + j); // same row
-            if (j !== row) peers.add(j * 9 + col); // same col
+            if (j !== col) peers.add(row * 9 + j);
+            if (j !== row) peers.add(j * 9 + col);
           }
           for (let dr = 0; dr < 3; dr++)
             for (let dc = 0; dc < 3; dc++) {
               const ni = (br + dr) * 9 + (bc + dc);
               if (ni !== idx) peers.add(ni);
             }
-
-          const deps = [];
-          const seen = new Set(); // avoid listing same cell twice
+          const deps = [],
+            seen = new Set();
           for (const d of wrongCandidates) {
             for (const pi of peers) {
-              // The dep cell must be: currently empty AND solution value = d
               if (board[pi] === 0 && solution[pi] === d && !seen.has(pi)) {
                 seen.add(pi);
-                const pr = Math.floor(pi / 9);
-                const pc = pi % 9;
+                const pr = Math.floor(pi / 9),
+                  pc = pi % 9;
                 deps.push({
                   cellIdx: pi,
                   cellRow: pr + 1,
                   cellCol: pc + 1,
                   eliminates: d,
                 });
-                break; // one dep cell per wrong candidate is enough
+                break;
               }
             }
           }
@@ -2085,11 +2259,9 @@
 
         function showHint() {
           if (selected < 0 || board[selected] !== 0) return;
-
-          const row = Math.floor(selected / 9);
-          const col = selected % 9;
+          const row = Math.floor(selected / 9),
+            col = selected % 9;
           $hintLabel.textContent = `Hint — Row ${row + 1}, Column ${col + 1}`;
-
           const analysis = computeHint(selected);
           const validNums = Object.keys(analysis)
             .map(Number)
@@ -2097,20 +2269,13 @@
           const blocked = Object.keys(analysis)
             .map(Number)
             .filter((d) => analysis[d].length > 0);
-
           $hintCandsRow.innerHTML = "";
           $hintLogic.innerHTML = "";
           _clearDepHighlights();
-          // Reset section label — Case C may have changed it
           const _secLabel = document.getElementById("hint-sec-label");
           if (_secLabel) _secLabel.textContent = "Valid candidates";
 
-          /* ──────────────────────────────────────────────────────────
-             CASE A — No solution available yet
-             Show all valid constraint candidates (unchanged old behaviour).
-          ────────────────────────────────────────────────────────── */
           if (!solutionReady) {
-            // Candidates row — all valid digits shown
             if (validNums.length === 0) {
               $hintCandsRow.innerHTML = `<div class="hint-no-cands">No valid digit fits here — check for conflicts above.</div>`;
             } else {
@@ -2129,27 +2294,19 @@
                 }
                 $hintCandsRow.appendChild(pill);
               }
-              // Summary
               const sum = document.createElement("div");
               sum.className = "hint-valid-summary";
               sum.innerHTML = `<strong>${validNums.join(", ")}</strong> — not found in this row, column, or 3×3 box. ${validNums.length === 1 ? "Only one option — this cell is determined." : "Any of these could go here."}`;
               $hintLogic.appendChild(sum);
             }
-            // Blocked reasons
             _renderBlockedReasons(blocked, analysis);
             $hintPanel.classList.add("on");
             hintOpen = true;
             return;
           }
 
-          /* ──────────────────────────────────────────────────────────
-             CASE B — Solution ready, exactly 1 valid candidate
-             DETERMINISTIC: constraints alone tell us the answer now.
-          ────────────────────────────────────────────────────────── */
           if (validNums.length === 1) {
-            const answer = validNums[0]; // must equal solution[selected]
-
-            // Big green answer pill
+            const answer = validNums[0];
             const pill = document.createElement("div");
             pill.className = "hint-digit answer";
             pill.textContent = answer;
@@ -2159,28 +2316,17 @@
               closeHint();
             });
             $hintCandsRow.appendChild(pill);
-
-            // Explanation
             const sum = document.createElement("div");
             sum.className = "hint-valid-summary";
             sum.innerHTML = `<strong>${answer}</strong> is the only digit not yet present in this row, column, and 3×3 box. This cell is fully determined — click the digit above to place it.`;
             $hintLogic.appendChild(sum);
-
-            // Still show why the other 8 are blocked
             _renderBlockedReasons(blocked, analysis);
             $hintPanel.classList.add("on");
             hintOpen = true;
             return;
           }
 
-          /* ──────────────────────────────────────────────────────────
-             CASE C — Solution ready, multiple valid candidates
-             INDETERMINATE: correct digit known from solution, but
-             other cells must be solved first to make this one
-             deterministic by constraints.
-          ────────────────────────────────────────────────────────── */
           if (validNums.length === 0) {
-            // Should not happen if there are no conflicts, but handle gracefully
             $hintCandsRow.innerHTML = `<div class="hint-no-cands">No valid digit fits here — check for conflicts above.</div>`;
             $hintPanel.classList.add("on");
             hintOpen = true;
@@ -2189,118 +2335,71 @@
 
           const correctDigit = solution[selected];
           const deps = computeDependencies(selected, validNums);
-
-          // ── Section label override
           const secLabel = document.getElementById("hint-sec-label");
           if (secLabel) secLabel.textContent = "Solve other cells first";
-
-          // ── Amber "dependencies required" notice instead of digit pills
           const notice = document.createElement("div");
-          notice.style.cssText = `
-            display:flex; align-items:flex-start; gap:8px;
-            padding:10px 12px; border-radius:var(--r-md);
-            background:rgba(210,153,34,0.10);
-            border:1px solid rgba(210,153,34,0.30);
-            font-size:0.75rem; line-height:1.6; color:var(--text-2);
-          `;
-          notice.innerHTML = `
-            <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--amber);fill:none;stroke-width:2.2;flex-shrink:0;margin-top:2px">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-            <span>
-              This cell cannot be determined yet —
-              <strong style="color:var(--amber)">${validNums.length} digits</strong>
-              (${validNums.join(", ")}) are all constraint-valid right now.
-              Fill the highlighted cells below first, then return here.
-            </span>
-          `;
+          notice.style.cssText =
+            "display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:var(--r-md);background:var(--amber-dim);border:1px solid rgba(154,103,0,0.25);font-size:0.75rem;line-height:1.6;color:var(--text-2);";
+          notice.innerHTML = `<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--amber);fill:none;stroke-width:2.2;flex-shrink:0;margin-top:2px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>This cell cannot be determined yet — <strong style="color:var(--amber)">${validNums.length} digits</strong> (${validNums.join(", ")}) are all constraint-valid right now. Fill the highlighted cells below first, then return here.</span>`;
           $hintCandsRow.appendChild(notice);
-
-          // ── Dependency list in the logic section
           if (deps.length > 0) {
             const depHeader = document.createElement("div");
             depHeader.className = "hint-dep-header";
-            depHeader.innerHTML = `
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
-              Cells to solve before this one
-            `;
+            depHeader.innerHTML = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>Cells to solve before this one`;
             $hintLogic.appendChild(depHeader);
-
             const depList = document.createElement("div");
             depList.className = "hint-dep-list";
-
             const depIdxSet = new Set(deps.map((d) => d.cellIdx));
             _applyDepHighlights(depIdxSet);
-
             deps.forEach(({ cellIdx, cellRow, cellCol, eliminates }) => {
               const depRow = document.createElement("div");
               depRow.className = "hint-dep-row";
-
               const cellRef = document.createElement("span");
               cellRef.className = "hint-dep-cell-ref";
               cellRef.innerHTML = `R${cellRow} C${cellCol}`;
               cellRef.title = `Jump to Row ${cellRow}, Column ${cellCol}`;
-              // Clicking jumps to that cell on the grid
               cellRef.addEventListener("click", () => {
                 selectCell(cellIdx);
                 closeHint();
               });
-
-              const elimBadge = document.createElement("span");
-              elimBadge.className = "hint-dep-elim-badge";
-              elimBadge.textContent = eliminates;
-
               const text = document.createElement("span");
               text.style.color = "var(--text-2)";
               text.style.fontSize = "0.71rem";
               text.innerHTML = `once filled, will eliminate <span style="color:var(--amber);font-family:var(--mono);font-weight:700">${eliminates}</span> as a candidate here`;
-
               depRow.appendChild(cellRef);
               depRow.appendChild(text);
               depList.appendChild(depRow);
             });
-
             $hintLogic.appendChild(depList);
-
-            // Closing note
             const note = document.createElement("div");
             note.style.cssText =
               "font-size:0.69rem;color:var(--text-3);padding-top:6px;border-top:1px solid var(--border);margin-top:4px;line-height:1.55;";
             note.textContent = `After filling ${deps.length === 1 ? "that cell" : "those cells"}, open this hint again — the answer for this cell will appear.`;
             $hintLogic.appendChild(note);
           } else {
-            // deps is empty — all wrong candidates are blocked by already-filled cells,
-            // but solution is somehow ambiguous (shouldn't normally happen).
             const fallback = document.createElement("div");
             fallback.className = "hint-valid-summary";
             fallback.innerHTML = `Constraint analysis shows multiple candidates (${validNums.join(", ")}). Keep filling other cells and try again.`;
             $hintLogic.appendChild(fallback);
           }
-
-          // Always show why blocked digits are blocked
           _renderBlockedReasons(blocked, analysis);
-
           $hintPanel.classList.add("on");
           hintOpen = true;
         }
 
-        /* ── Shared helper: render "digit X is blocked because…" rows ── */
         function _renderBlockedReasons(blocked, analysis) {
           if (blocked.length === 0) return;
-          const typeOrder = ["row", "col", "box"];
-          const typeLabels = { row: "row", col: "column", box: "3×3 box" };
-          const typeClass = {
-            row: "row-reason",
-            col: "col-reason",
-            box: "box-reason",
-          };
-
+          const typeOrder = ["row", "col", "box"],
+            typeLabels = { row: "row", col: "column", box: "3×3 box" },
+            typeClass = {
+              row: "row-reason",
+              col: "col-reason",
+              box: "box-reason",
+            };
           for (const d of blocked) {
             const reasons = analysis[d];
             const row2 = document.createElement("div");
             row2.className = "hint-logic-row";
-
             const seen = new Set();
             const unique = reasons.filter((r) => {
               if (seen.has(r.type)) return false;
@@ -2317,9 +2416,7 @@
               )
               .join("");
             const firstR = unique[0];
-            row2.innerHTML =
-              `<span class="hint-logic-digit">${d}</span>` +
-              `<span class="hint-logic-text">already in ${firstR.detail}${pills}</span>`;
+            row2.innerHTML = `<span class="hint-logic-digit">${d}</span><span class="hint-logic-text">already in ${firstR.detail}${pills}</span>`;
             $hintLogic.appendChild(row2);
           }
         }
@@ -2331,7 +2428,7 @@
           render();
         }
 
-        /* ── selectCell ──────────────────────────────────────────────── */
+        /* ── selectCell ──────────────────────────────────── */
         function selectCell(i) {
           if (selected === i) {
             selected = -1;
@@ -2345,51 +2442,38 @@
         }
 
         function enterDigit(n) {
-          if (selected < 0) return;
-          if (given[selected]) return; // never modify OCR-given cells
-
+          if (selected < 0 || given[selected]) return;
           if (n === 0) {
-            // DEL — clears both pen digit and all pencil marks
             board[selected] = 0;
             pencilMarks[selected].clear();
           } else if (inputMode === "pencil") {
-            // Pencil mode: toggle candidate mark; clear pen digit first
-            if (board[selected] !== 0) {
-              board[selected] = 0; // writing pencil marks removes pen digit
-            }
-            if (pencilMarks[selected].has(n)) {
-              pencilMarks[selected].delete(n);
-            } else {
-              pencilMarks[selected].add(n);
-            }
+            if (board[selected] !== 0) board[selected] = 0;
+            if (pencilMarks[selected].has(n)) pencilMarks[selected].delete(n);
+            else pencilMarks[selected].add(n);
           } else {
-            // Pen mode: confirm digit; clear pencil marks on this cell
             board[selected] = n;
             pencilMarks[selected].clear();
-            // Also remove this digit from pencil marks of all peers
             const r = Math.floor(selected / 9),
-              c = selected % 9;
-            const br = Math.floor(r / 3) * 3,
+              c = selected % 9,
+              br = Math.floor(r / 3) * 3,
               bc = Math.floor(c / 3) * 3;
             for (let j = 0; j < 9; j++) {
-              pencilMarks[r * 9 + j].delete(n); // same row
-              pencilMarks[j * 9 + c].delete(n); // same col
+              pencilMarks[r * 9 + j].delete(n);
+              pencilMarks[j * 9 + c].delete(n);
             }
             for (let dr = 0; dr < 3; dr++)
               for (let dc = 0; dc < 3; dc++)
-                pencilMarks[(br + dr) * 9 + (bc + dc)].delete(n); // same box
+                pencilMarks[(br + dr) * 9 + (bc + dc)].delete(n);
           }
-
           render();
           const el = document.getElementById("c" + selected);
           if (el && !given[selected] && board[selected] !== 0)
             el.classList.add("user");
           updateHintTrigger();
-          updateChip(); // immediate wrong-placement + completion check
-          scheduleValidate(); // async conflict check from server
+          updateChip();
+          scheduleValidate();
         }
 
-        /* keyboard */
         document.addEventListener("keydown", (e) => {
           if (!$board.classList.contains("on")) return;
           const n = parseInt(e.key);
@@ -2405,7 +2489,6 @@
             closeHint();
             return;
           }
-          // P = pen mode, C = pencil (candidate) mode
           if (e.key === "p" || e.key === "P") {
             setMode("pen");
             return;
@@ -2431,12 +2514,11 @@
           }
         });
 
-        /* ── live validation ─────────────────────────────────────────── */
+        /* ── live validation ─────────────────────────────── */
         function scheduleValidate() {
           clearTimeout(valTimer);
           valTimer = setTimeout(runValidate, 100);
         }
-
         async function runValidate() {
           try {
             const res = await fetch(`${API}/api/validate`, {
@@ -2452,15 +2534,14 @@
           render();
           updateChip();
         }
-
         function localConflicts() {
-          const pairs = [];
-          const seen = new Set();
+          const pairs = [],
+            seen = new Set();
           for (let i = 0; i < 81; i++) {
             if (!board[i]) continue;
             const r = Math.floor(i / 9),
-              c = i % 9;
-            const br = Math.floor(r / 3) * 3,
+              c = i % 9,
+              br = Math.floor(r / 3) * 3,
               bc = Math.floor(c / 3) * 3;
             const peers = [
               ...Array.from({ length: 9 }, (_, j) => r * 9 + j).filter(
@@ -2487,14 +2568,12 @@
           }
           return pairs;
         }
-
         function updateChip() {
           const nConflict = conflicts.length;
           const nWrong = solutionReady
             ? board.filter((v, i) => !given[i] && v !== 0 && v !== solution[i])
                 .length
             : 0;
-
           if (nConflict > 0 || nWrong > 0) {
             const parts = [];
             if (nConflict > 0)
@@ -2509,79 +2588,57 @@
           } else {
             $chip.classList.remove("on");
           }
-
           checkCompletion();
         }
-
-        /* ── completion detection ────────────────────────────────────────── */
         function checkCompletion() {
           if (completionShown) return;
-          // All 81 filled?
           if (board.some((v) => v === 0)) return;
-          // No rule conflicts?
           if (conflicts.length > 0) return;
-          // Solution matches (if we have it)?
           if (solutionReady) {
             if (board.some((v, i) => v !== solution[i])) return;
           }
-          // All checks passed — celebrate!
           completionShown = true;
-          setTimeout(showCompletion, 180); // tiny delay so last render paints first
+          setTimeout(showCompletion, 180);
         }
-
         function showCompletion() {
-          // Flash all cells green
           const grid = document.getElementById("grid");
           grid.classList.add("completed");
           setTimeout(() => grid.classList.remove("completed"), 900);
-
-          // Spawn confetti
           spawnConfetti();
-
-          // Show overlay
           document.getElementById("completion-overlay").classList.add("on");
         }
-
         function spawnConfetti() {
           const wrap = document.getElementById("confetti-wrap");
           wrap.innerHTML = "";
           const COLORS = [
-            "#3fb950",
-            "#388bfd",
-            "#a371f7",
-            "#f85149",
-            "#d29922",
-            "#79c0ff",
-            "#56d364",
-            "#ff7b72",
+            "#1a7f37",
+            "#0969da",
+            "#6639ba",
+            "#cf222e",
+            "#9a6700",
+            "#0550ae",
+            "#2da44e",
+            "#fa4549",
           ];
           const COUNT = 52;
           for (let i = 0; i < COUNT; i++) {
             const el = document.createElement("div");
             el.className = "confetti-piece";
-            const left = Math.random() * 100;
-            const drop = 260 + Math.random() * 120;
-            const spin = Math.round(Math.random() * 720 - 360);
-            const flip = Math.random() > 0.5 ? -1 : 1;
-            const dur = 0.9 + Math.random() * 0.7;
-            const delay = Math.random() * 0.5;
-            const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-            // vary shape: squares and thin rectangles
-            const w = Math.random() > 0.4 ? 7 : 4;
-            const h = Math.random() > 0.4 ? 7 : 14;
-            el.style.cssText = `
-              left:${left}%;
-              width:${w}px; height:${h}px;
-              background:${color};
-              border-radius:${Math.random() > 0.5 ? "50%" : "2px"};
-              --drop:${drop}px; --spin:${spin}deg; --flip:${flip};
-              --dur:${dur}s; --delay:${delay}s;
-            `;
+            const left = Math.random() * 100,
+              drop = 260 + Math.random() * 120,
+              spin = Math.round(Math.random() * 720 - 360),
+              flip = Math.random() > 0.5 ? -1 : 1,
+              dur = 0.9 + Math.random() * 0.7,
+              delay = Math.random() * 0.5,
+              color = COLORS[Math.floor(Math.random() * COLORS.length)],
+              w = Math.random() > 0.4 ? 7 : 4,
+              h = Math.random() > 0.4 ? 7 : 14;
+            el.style.cssText = `left:${left}%;width:${w}px;height:${h}px;background:${color};border-radius:${Math.random() > 0.5 ? "50%" : "2px"};--drop:${drop}px;--spin:${spin}deg;--flip:${flip};--dur:${dur}s;--delay:${delay}s;`;
             wrap.appendChild(el);
           }
         }
 
-        /* ── image pipeline panels ───────────────────────────────────── */
+        /* ── image pipeline panels ───────────────────────── */
         const IMG_LABELS = {
           original: "Original + grid corners",
           grayscale: "Grayscale",
@@ -2596,7 +2653,6 @@
           "warped",
           "binary_grid",
         ];
-
         function showImagePanels(images) {
           if (!images) return;
           $imgGrid.innerHTML = "";
@@ -2606,19 +2662,34 @@
             const panel = document.createElement("div");
             panel.className =
               "img-panel" + (key === "binary_grid" ? " binary" : "");
-            panel.innerHTML =
-              `<div class="img-panel-label">${IMG_LABELS[key] || key}</div>` +
-              `<img src="data:image/png;base64,${b64}" alt="${key}" loading="lazy"/>`;
+            panel.innerHTML = `<div class="img-panel-label">${IMG_LABELS[key] || key}</div><img src="data:image/png;base64,${b64}" alt="${key}" loading="lazy"/>`;
             $imgGrid.appendChild(panel);
           });
           $imgPnl.classList.add("on");
         }
 
-        /* ── load board ──────────────────────────────────────────────── */
+        /* ── load board (cell-by-cell reveal) ───────────────
+         After OCR returns, the board panel is shown immediately
+         with ALL cells blank. Then we scan left-to-right,
+         top-to-bottom: each cell gets a green scanner highlight
+         for ~18ms, and if a digit was detected it "pops" in
+         with a scale animation. Blank cells get a brief flash.
+         This makes every detected digit individually visible,
+         exactly as Dr. Das requested.
+      ──────────────────────────────────────────────────── */
+        let _revealTimer = null; // so uploadNew can cancel a running reveal
+
         function loadBoard(digits, mode) {
-          board = [...digits];
+          // Cancel any in-progress reveal from a previous image
+          if (_revealTimer !== null) {
+            clearTimeout(_revealTimer);
+            _revealTimer = null;
+          }
+
+          // Initialise state — board starts fully blank; given/ocrSnap hold final values
           ocrSnap = [...digits];
           given = digits.map((v) => v !== 0);
+          board = Array(81).fill(0); // all blank — reveal fills these in
           pencilMarks = Array.from({ length: 81 }, () => new Set());
           selected = -1;
           conflicts = [];
@@ -2628,15 +2699,88 @@
           closeHint();
           $chip.classList.remove("on");
           document.getElementById("completion-overlay").classList.remove("on");
-          $dcount.textContent = digits.filter(Boolean).length;
           $dinfo.classList.add("on");
           setOcrBadge(mode === "cnn" ? "cnn" : "knn");
+
+          // Show board panel with blank grid immediately
+          $board.classList.add("on");
           render();
-          runValidate();
-          fetchSolution(digits);
+
+          // Reveal counter badge
+          const totalDigits = digits.filter(Boolean).length;
+          const counter = document.getElementById("reveal-counter");
+          let revealed = 0;
+          if (counter) {
+            counter.textContent = `0 / ${totalDigits}`;
+            counter.classList.add("on");
+          }
+
+          /* Scan each cell in order, one per tick */
+          const CELL_DELAY = 18; // ms between cells — 81 × 18 ≈ 1.45 s total
+          let idx = 0;
+
+          function revealNext() {
+            // Remove scanner highlight from previous cell
+            if (idx > 0) {
+              const prev = document.getElementById("c" + (idx - 1));
+              if (prev) prev.classList.remove("cell-scanning");
+            }
+
+            if (idx >= 81) {
+              // All cells done — run post-reveal steps
+              if (counter) counter.classList.remove("on");
+              $dcount.textContent = totalDigits;
+              runValidate();
+              fetchSolution(ocrSnap);
+              _revealTimer = null;
+              return;
+            }
+
+            const cellEl = document.getElementById("c" + idx);
+            const digit = digits[idx];
+
+            // Scanner highlight — shows "currently being read"
+            if (cellEl) cellEl.classList.add("cell-scanning");
+
+            // Place digit into live board state
+            board[idx] = digit;
+
+            if (digit !== 0) {
+              // Digit cell: update DOM directly for the pop animation
+              revealed++;
+              if (counter) counter.textContent = `${revealed} / ${totalDigits}`;
+
+              if (cellEl) {
+                // Apply final classes before the animation so colour is right
+                cellEl.className = "cell given cell-scanning cell-revealed";
+                cellEl.dataset.r = Math.floor(idx / 9);
+                cellEl.dataset.c = idx % 9;
+                const dvEl = document.getElementById("dv" + idx);
+                if (dvEl) dvEl.textContent = digit;
+              }
+            } else {
+              // Blank cell: brief green flash, no digit
+              if (cellEl) {
+                cellEl.classList.add("cell-scan-blank");
+                // Remove flash class after animation so it doesn't interfere later
+                cellEl.addEventListener(
+                  "animationend",
+                  () => {
+                    cellEl.classList.remove("cell-scan-blank");
+                  },
+                  { once: true },
+                );
+              }
+            }
+
+            idx++;
+            _revealTimer = setTimeout(revealNext, CELL_DELAY);
+          }
+
+          // Small delay before starting so the board paint settles
+          _revealTimer = setTimeout(revealNext, 80);
         }
 
-        /* ── fetch solution silently (for wrong-placement + completion check) ── */
         async function fetchSolution(digits) {
           try {
             const res = await fetch(`${API}/api/solve`, {
@@ -2651,22 +2795,24 @@
               render();
               updateChip();
             }
-          } catch {
-            // Backend offline — solution check unavailable
-          }
+          } catch {}
         }
 
-        /* ── OCR ─────────────────────────────────────────────────────── */
+        /* ── OCR (with skeleton) ─────────────────────────── */
         async function handleFile(file) {
           if (!file || !file.type.startsWith("image/")) {
             setStatus("error", "Please upload a valid image file.");
             return;
           }
 
-          setStatus(
-            "loading",
-            "Running OCR — detecting grid and classifying digits…",
-          );
+          /* 1. Immediately show the skeleton — user sees instant feedback */
+          $upload.style.display = "none";
+          $skeleton.classList.add("on");
+          setPills(2);
+          buildSkeletonGrid();
+          startStageCycler();
+          setStatus("loading", "Running OCR pipeline…");
+
           const fd = new FormData();
           fd.append("image", file);
 
@@ -2676,25 +2822,32 @@
               body: fd,
             });
             const data = await res.json();
+
+            /* 2. Hide skeleton, show real board */
+            stopStageCycler();
+            $skeleton.classList.remove("on");
+
             if (!res.ok || data.error) {
+              $upload.style.display = "";
               setStatus(
                 "error",
                 data.error || "OCR failed. Try a clearer image.",
               );
+              setPills(1);
               return;
             }
 
             loadBoard(data.board, data.mode);
             showImagePanels(data.images);
             setPills(3);
-            $upload.style.display = "none";
-            $board.classList.add("on");
             setStatus(
               "success",
-              `OCR complete — ${data.digit_count} digits detected (${data.mode === "cnn" ? "CNN model" : "kNN fallback"}).`,
+              `OCR complete — ${data.digit_count} digits detected (${data.mode === "cnn" ? "CNN model" : "kNN fallback"}). Revealing cells…`,
             );
           } catch {
-            // demo fallback when backend is offline
+            stopStageCycler();
+            $skeleton.classList.remove("on");
+            /* demo fallback */
             const demo = [
               5, 3, 0, 0, 7, 0, 0, 0, 0, 6, 0, 0, 1, 9, 5, 0, 0, 0, 0, 9, 8, 0,
               0, 0, 0, 6, 0, 8, 0, 0, 0, 6, 0, 0, 0, 3, 4, 0, 0, 8, 0, 3, 0, 0,
@@ -2703,8 +2856,6 @@
             ];
             loadBoard(demo, "knn");
             setPills(3);
-            $upload.style.display = "none";
-            $board.classList.add("on");
             setStatus(
               "error",
               "⚠ Backend offline — demo puzzle loaded. Run: python app.py",
@@ -2712,7 +2863,7 @@
           }
         }
 
-        /* ── reset / clear / new ─────────────────────────────────────── */
+        /* ── reset / clear / new ─────────────────────────── */
         function resetToOCR() {
           board = [...ocrSnap];
           pencilMarks = Array.from({ length: 81 }, () => new Set());
@@ -2726,7 +2877,6 @@
           setStatus("success", "Board reset to OCR result.", true);
           render();
         }
-
         function clearAll() {
           board = Array(81).fill(0);
           given = Array(81).fill(false);
@@ -2743,17 +2893,31 @@
           document
             .querySelectorAll(".cell")
             .forEach((c) =>
-              c.classList.remove("conflict", "user", "given", "warn"),
+              c.classList.remove(
+                "conflict",
+                "user",
+                "given",
+                "warn",
+                "cell-scanning",
+                "cell-revealed",
+                "cell-scan-blank",
+              ),
             );
           setStatus("", "", true);
           render();
         }
-
         function uploadNew() {
+          if (_revealTimer !== null) {
+            clearTimeout(_revealTimer);
+            _revealTimer = null;
+          }
+          const counter = document.getElementById("reveal-counter");
+          if (counter) counter.classList.remove("on");
           clearAll();
           $board.classList.remove("on");
           $imgPnl.classList.remove("on");
           $imgGrid.innerHTML = "";
+          $skeleton.classList.remove("on");
           $upload.style.display = "";
           $dinfo.classList.remove("on");
           setStatus("idle", "Waiting for image…");
@@ -2762,7 +2926,7 @@
           $tip.classList.add("on");
         }
 
-        /* ── drag & drop ─────────────────────────────────────────────── */
+        /* ── drag & drop ─────────────────────────────────── */
         dropZone.addEventListener("dragover", (e) => {
           e.preventDefault();
           dropZone.classList.add("drag");
@@ -2777,7 +2941,7 @@
         });
         fileIn.addEventListener("change", (e) => handleFile(e.target.files[0]));
 
-        /* ── button wiring ───────────────────────────────────────────── */
+        /* ── button wiring ───────────────────────────────── */
         document
           .getElementById("mode-pen")
           .addEventListener("click", () => setMode("pen"));
@@ -2799,7 +2963,7 @@
           .getElementById("btn-completion-new")
           .addEventListener("click", uploadNew);
 
-        /* ── health check on load ────────────────────────────────────── */
+        /* ── health check on load ────────────────────────── */
         (async () => {
           try {
             const d = await (await fetch(`${API}/api/health`)).json();
@@ -2808,7 +2972,7 @@
           } catch {}
         })();
 
-        /* ── init ────────────────────────────────────────────────────── */
+        /* ── init ────────────────────────────────────────── */
         buildGrid();
         buildNumpad();
         render();
