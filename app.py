@@ -206,7 +206,7 @@ def ocr_endpoint():
         log.error("OCR pipeline error:\n" + tb)
         # Return detailed error in debug mode so dev can diagnose quickly
         import os as _os
-        if _os.environ.get("FLASK_DEBUG", "1") == "1":
+        if _os.environ.get("FLASK_DEBUG", "0") == "1":
             return _error(f"OCR failed: {type(exc).__name__}: {exc}", 500)
         return _error(
             "OCR processing failed. Try a clearer, well-lit photo of the grid.",
