@@ -88,10 +88,10 @@ class SEResBlock(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         residual = x
-        out      = self.conv_block(x)
+        out = self.conv_block(x)
         # SE: reshape gate to (B, C, 1, 1) for broadcast
-        gate     = self.se(out).unsqueeze(-1).unsqueeze(-1)
-        out      = out * gate
+        gate = self.se(out).unsqueeze(-1).unsqueeze(-1)
+        out = out * gate
         # Skip connection + activation
         return self.activation(residual + out)
 
@@ -102,7 +102,7 @@ class SEResBlock(nn.Module):
 
 class DigitCNN(nn.Module):
     """
-    Custom deep CNN for Telegraph newspaper sudoku digit recognition.
+    Custom deep CNN for sudoku digit recognition.
 
     Design choices:
     • Stem conv: 3×3, no stride — preserve spatial detail at 28×28
