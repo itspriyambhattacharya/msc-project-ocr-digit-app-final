@@ -1,63 +1,11 @@
-"""
-backend/model.py
-================
-DigitCNN — Custom Telegraph Newspaper Sudoku Digit Recogniser.
-
-INPUT  : (B, 1, 28, 28)  grayscale — BLACK digit on WHITE background
-OUTPUT : (B, 10)          logits for classes 0-9  (0 = blank cell)
-
-Architecture: Custom Deep CNN with Residual Blocks + SE Attention
-─────────────────────────────────────────────────────────────────
-  This is an original architecture designed specifically for recognising
-  printed digits from Telegraph newspaper sudoku photographs.
-
-  The design draws on the following well-known architectural ideas:
-    • Residual (skip) connections  [He et al., 2016 — ResNet]
-    • Squeeze-and-Excitation channel attention  [Hu et al., 2018 — SENet]
-    • Global Average Pooling instead of Flatten  [Lin et al., 2014 — NIN]
-    • Label smoothing + cosine LR schedule  [modern training best practices]
-
-  All source code is original — no pretrained model or pretrained weights
-  are used.  The architecture parameters, block structure, channel counts,
-  and head design are custom-tuned for this specific 28×28 digit task.
-
-Spatial flow:
-  Input  (1, 28, 28)
-  Stem   → (32, 28, 28)
-  Stage1 → (64, 14, 14)   stride-2 conv + SEResBlock × 1
-  Stage2 → (128,  7,  7)  stride-2 conv + SEResBlock × 2
-  Stage3 → (256,  4,  4)  stride-2 conv + SEResBlock × 1
-  GAP    → (256,)
-  Head   → 256 → 512 → 256 → 10
-
-Normalisation (must be IDENTICAL in train.py and ocr.py):
-  mean = 0.8693   std = 0.3081   (black digit on white background)
-"""
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
 #  BUILDING BLOCK — Squeeze-and-Excitation Residual Block
-# ═══════════════════════════════════════════════════════════════════════════════
 
 class SEResBlock(nn.Module):
-    """
-    Custom residual block combining:
-      1. Two 3×3 conv layers (same channel count, no spatial downsampling)
-      2. Batch normalisation after each conv
-      3. Identity skip connection (input added directly to output)
-      4. Squeeze-and-Excitation channel recalibration
-
-    SE attention mechanism:
-      • Global average pool → scalar per channel (squeeze)
-      • Two FC layers with bottleneck (excitation)
-      • Sigmoid gate multiplied back onto feature map
-      This teaches the block which channels carry digit information
-      and suppresses channels dominated by paper texture noise.
-    """
 
     def __init__(self, channels: int, se_ratio: int = 8):
         super().__init__()
@@ -96,27 +44,14 @@ class SEResBlock(nn.Module):
         return self.activation(residual + out)
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
 #  MAIN MODEL — DigitCNN
-# ═══════════════════════════════════════════════════════════════════════════════
 
 class DigitCNN(nn.Module):
-    """
-    Custom deep CNN for sudoku digit recognition.
-
-    Design choices:
-    • Stem conv: 3×3, no stride — preserve spatial detail at 28×28
-    • 3 downsampling stages via stride-2 conv (not MaxPool) — learnable
-    • SEResBlocks after each downsampling — channel recalibration
-    • Global Average Pooling — translation-robust, no spatial overfit
-    • Wide head (256→512→256→10) with heavy dropout — handles noisy inputs
-    • BatchNorm throughout — stable training on mixed real/synthetic data
-    """
 
     def __init__(self):
         super().__init__()
 
-        # ── Stem: initial feature extraction, full spatial resolution ─────────
+        # Stem: initial feature extraction, full spatial resolution
         # 3×3 conv, 32 channels, no stride → preserves all spatial detail
         self.stem = nn.Sequential(
             nn.Conv2d(1, 32, kernel_size=3, padding=1, bias=False),
@@ -124,7 +59,7 @@ class DigitCNN(nn.Module):
             nn.ReLU(inplace=True),
         )
 
-        # ── Stage 1: 28×28 → 14×14, 32→64 channels ───────────────────────────
+        # Stage 1: 28×28 → 14×14, 32→64 channels
         # stride-2 conv for learnable downsampling (vs fixed MaxPool)
         # SEResBlock recalibrates channels at this spatial scale
         self.stage1 = nn.Sequential(
@@ -136,7 +71,7 @@ class DigitCNN(nn.Module):
             nn.Dropout2d(p=0.10),
         )
 
-        # ── Stage 2: 14×14 → 7×7, 64→128 channels ────────────────────────────
+        # Stage 2: 14×14 → 7×7, 64→128 channels
         # Two SEResBlocks: most discriminative scale for digit strokes
         # (~3-8 px wide strokes on a 14px canvas)
         self.stage2 = nn.Sequential(
@@ -149,7 +84,7 @@ class DigitCNN(nn.Module):
             nn.Dropout2d(p=0.15),
         )
 
-        # ── Stage 3: 7×7 → 4×4, 128→256 channels ─────────────────────────────
+        # Stage 3: 7×7 → 4×4, 128→256 channels
         # High-level semantic features; one SEResBlock is sufficient
         self.stage3 = nn.Sequential(
             nn.Conv2d(128, 256, kernel_size=3,
@@ -160,12 +95,12 @@ class DigitCNN(nn.Module):
             nn.Dropout2d(p=0.20),
         )
 
-        # ── Global Average Pooling: 4×4 → 1×1 ────────────────────────────────
+        # Global Average Pooling: 4×4 → 1×1
         # More translation-robust than Flatten for slightly off-centre digits.
         # Output: (B, 256) after squeeze
         self.gap = nn.AdaptiveAvgPool2d(output_size=1)
 
-        # ── Classifier Head ───────────────────────────────────────────────────
+        # Classifier Head
         # Wide intermediate layer (512) captures subtle inter-class differences
         # e.g. 1 vs 7 (horizontal cap), 6 vs 9 (open/closed loop)
         # Heavy dropout regularises against synthetic↔real domain gap
