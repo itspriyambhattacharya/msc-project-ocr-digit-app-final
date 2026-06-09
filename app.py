@@ -1,20 +1,3 @@
-"""
-app.py  —  OCR Sudoku Solver (Telegraph Edition)
-=================================================
-HOW TO RUN:
-    cd <project_root>
-    python app.py
-    Open: http://127.0.0.1:5000
-
-ENDPOINTS
-─────────
-  GET  /             → frontend/index.html
-  POST /api/ocr      → image upload → 81-cell board JSON + pipeline images
-  POST /api/solve    → board JSON   → solution JSON
-  POST /api/validate → board JSON   → conflict list (live check)
-  GET  /api/health   → model + server status
-"""
-
 from backend.solver import solve_sudoku, validate_board
 from backend.ocr import extract_sudoku_full, extract_sudoku_from_image, load_model
 from flask_cors import CORS
@@ -24,7 +7,7 @@ import sys
 import logging
 import traceback
 
-# ── Paths ──────────────────────────────────────────────────────────────────────
+# Paths
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 BACKEND_DIR = os.path.join(ROOT_DIR, "backend")
 FRONTEND_DIR = os.path.join(ROOT_DIR, "frontend")
@@ -34,7 +17,7 @@ for p in (ROOT_DIR, BACKEND_DIR):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-# ── Logging ────────────────────────────────────────────────────────────────────
+# Logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s  %(levelname)-8s  %(message)s",
@@ -42,9 +25,9 @@ logging.basicConfig(
 )
 log = logging.getLogger("sudoku_ocr")
 
-# ── Flask ──────────────────────────────────────────────────────────────────────
+# Flask
 
-# ── Project imports ────────────────────────────────────────────────────────────
+# Project imports
 # from backend.solver import solve_sudoku, validate_board
 
 app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
@@ -55,11 +38,10 @@ app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
 
 # Allowed MIME types — covers all common browser variations
 ALLOWED_TYPES = {
-    "image/jpeg", "image/jpg", "image/pjpeg",   # JPEG (various browser labels)
-    "image/png",  "image/x-png",                 # PNG
-    "image/webp",                                 # WEBP
-    "image/bmp",  "image/x-bmp",                 # BMP
-    # Some browsers send this for any file
+    "image/jpeg", "image/jpg", "image/pjpeg",
+    "image/png",  "image/x-png",
+    "image/webp",
+    "image/bmp",  "image/x-bmp",
     "application/octet-stream",
     "",                                           # No content-type header at all
 }
@@ -67,21 +49,18 @@ ALLOWED_TYPES = {
 # Allowed file extensions — used as fallback when MIME type is missing/wrong
 ALLOWED_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
 #  STARTUP — print status and load model
-# ═══════════════════════════════════════════════════════════════════════════════
 
 print("\n" + "=" * 60)
 print("  OCR Sudoku Solver")
 print("=" * 60)
-print(f"  Root     : {ROOT_DIR}")
-print(f"  Frontend : {FRONTEND_DIR}")
-print(f"  Model    : {MODEL_PATH}")
+# print(f"  Root     : {ROOT_DIR}")
+# print(f"  Frontend : {FRONTEND_DIR}")
+# print(f"  Model    : {MODEL_PATH}")
 idx_ok = os.path.isfile(os.path.join(FRONTEND_DIR, "index.html"))
-print(
-    f"  index.html: {'FOUND ✓' if idx_ok else 'MISSING ✗ — check frontend/'}")
-print("=" * 60 + "\n")
+# print(
+#     f"  index.html: {'FOUND ✓' if idx_ok else 'MISSING ✗ — check frontend/'}")
+# print("=" * 60 + "\n")
 
 model = None
 MODEL_READY = False
@@ -90,7 +69,7 @@ if os.path.isfile(MODEL_PATH):
     try:
         model = load_model(MODEL_PATH)
         MODEL_READY = True
-        print("  OCR mode : DigitCNN (PyTorch)  ✓\n")
+        print("  OCR mode : DigitCNN (PyTorch) \n")
     except RuntimeError as e:
         print(f"  ERROR : Model weights do not match the current architecture.")
         print(f"  Fix   : Delete digit_cnn.pth and retrain:  python backend/train.py")
@@ -104,9 +83,7 @@ else:
     print("  OCR mode : kNN fallback  (lower accuracy)\n")
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
 #  HELPERS
-# ═══════════════════════════════════════════════════════════════════════════════
 
 def _error(message: str, code: int = 400):
     """Return a consistent JSON error response."""
@@ -128,9 +105,7 @@ def _validate_board_input(data) -> tuple:
     return board, None
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
 #  ERROR HANDLERS
-# ═══════════════════════════════════════════════════════════════════════════════
 
 @app.errorhandler(413)
 def too_large(e):
@@ -147,9 +122,7 @@ def method_not_allowed(e):
     return _error("Method not allowed.", 405)
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
 #  ROUTES
-# ═══════════════════════════════════════════════════════════════════════════════
 
 @app.route("/")
 def index():
@@ -169,9 +142,6 @@ def ocr_endpoint():
     if not file or not file.filename:
         return _error("Empty file received.")
 
-    # Determine file type — check MIME type first, then fall back to extension.
-    # Browsers are inconsistent: Chrome may send 'image/jpeg', Firefox 'image/jpg',
-    # mobile browsers sometimes send 'application/octet-stream' or nothing at all.
     content_type = (file.content_type or "").lower().split(";")[0].strip()
     filename_ext = os.path.splitext(file.filename or "")[1].lower()
 
@@ -204,7 +174,6 @@ def ocr_endpoint():
     except Exception as exc:
         tb = traceback.format_exc()
         log.error("OCR pipeline error:\n" + tb)
-        # Return detailed error in debug mode so dev can diagnose quickly
         import os as _os
         if _os.environ.get("FLASK_DEBUG", "0") == "1":
             return _error(f"OCR failed: {type(exc).__name__}: {exc}", 500)
@@ -252,9 +221,7 @@ def health():
     })
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
 #  ENTRY POINT
-# ═══════════════════════════════════════════════════════════════════════════════
 
 # if __name__ == "__main__":
 #     port = int(os.environ.get("PORT", 5000))
