@@ -1,11 +1,3 @@
-"""
-backend/solver.py
-=================
-Sudoku solver — Backtracking + MRV (Minimum Remaining Values) heuristic.
-Also exposes validate_board() for the live /api/validate endpoint.
-"""
-
-
 def _is_valid(board, idx, val):
     row, col = divmod(idx, 9)
     for c in range(9):
@@ -78,10 +70,7 @@ def _find_conflicts(board):
 
 
 def solve_sudoku(flat_board: list) -> dict:
-    """
-    Solve a sudoku puzzle.
-    Returns dict with keys: solved, board, conflicts, error.
-    """
+
     conflicts = _find_conflicts(flat_board)
     if conflicts:
         return {
