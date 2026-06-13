@@ -140,11 +140,7 @@ class DigitCNN(nn.Module):
         return self.head(x)
 
     def predict_single(self, x: torch.Tensor):
-        """
-        Single-image inference helper.
-        x: (1, 1, 28, 28) tensor, already normalised
-        Returns (digit: int, confidence: float)
-        """
+
         self.eval()
         with torch.no_grad():
             probs = F.softmax(self.forward(x), dim=1)
