@@ -576,7 +576,7 @@ def train():
         if val_acc > best_acc:
             best_acc = val_acc
             torch.save(model.state_dict(), _BEST)
-            print(f"    ✓ New best  val={val_acc:.2f}%  → saved to {_BEST}")
+            print(f"    New best  val={val_acc:.2f}%  → saved to {_BEST}")
 
     print(f"\n{'='*68}")
     print(f"  Training complete.  Best validation accuracy: {best_acc:.2f}%")
